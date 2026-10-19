@@ -13,7 +13,8 @@ This branch is the reference launcher (v2.3) with two changes for one TV, a Xiao
 
 1. **Rotating wallpaper folder.** Pictures in `/sdcard/Wallpapers` (`.jpg`, `.jpeg`, `.png`, `.webp`) show
    behind Home and change every 30 minutes while Home is open, in file-name order. A picture added to the
-   folder, for example from a phone with Send Files to TV, shows at once and then joins the rotation.
+   folder (with `adb push`, or from a phone with a file-transfer app; the phone path is not tested yet)
+   shows at once and then joins the rotation.
    When the folder is empty, a theme's `wallpaper.jpg` shows as before.
 2. **Wallpaper tile and pop-up.** A Wallpaper tile at the end of the app grid opens a pop-up with the
    thumbnails. OK on one makes it the wallpaper and restarts the 30 minutes. Back closes it.
