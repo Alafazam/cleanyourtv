@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- Needed on Android 10 to read the Wi-Fi network name; granted over adb at install time. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Reads the pictures in the wallpaper folder (config.xml, wallpaper_folder); granted over adb at install time. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
          apps that declare a module card (docs/specs/card.md). -->
@@ -55,6 +57,12 @@
             </intent-filter>
         </activity>
 
+        <!-- The Wallpaper pop-up, opened only from the launcher's own Wallpaper tile. -->
+        <activity
+            android:name=".WallpaperPickerActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.TvHome.Picker" />
         <activity
             android:name=".HomeSettingsActivity"
             android:exported="false"

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Wallpaper pop-up: a glass panel over the dimmed home screen with the pictures in the wallpaper folder. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="860dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/glass_panel"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/wallpaper"
+        android:textColor="#FFFFFFFF"
+        android:textSize="24sp"
+        android:fontFamily="@font/outfit" />
+
+    <TextView
+        android:id="@+id/wallpaperHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="14dp"
+        android:textColor="#B3FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="@font/outfit" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/wallpaperGrid"
+        android:layout_width="match_parent"
+        android:layout_height="380dp"
+        android:clipToPadding="false" />
+</LinearLayout>

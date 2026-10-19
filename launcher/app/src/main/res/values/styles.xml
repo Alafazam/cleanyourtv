@@ -25,4 +25,12 @@
         <item name="android:clickable">true</item>
     </style>
     <style name="TopButton" parent="TopButtonBase" />
+
+    <!-- The Wallpaper pop-up: a dialog over the dimmed home screen, no title or frame of its own. -->
+    <style name="Theme.TvHome.Picker" parent="android:Theme.Material.Dialog.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 </resources>

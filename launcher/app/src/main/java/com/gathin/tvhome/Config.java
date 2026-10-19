@@ -30,6 +30,8 @@ final class Config {
     private static final String TAG = "TvHome.Config";
     static final String FILE_NAME = "config.json";
     static final String WALLPAPER_NAME = "wallpaper.jpg";
+    /** Longest wallpaper rotation a theme may set: one day. */
+    static final int MAX_ROTATE_MINUTES = 24 * 60;
 
     final List<String> dockApps;
     final List<String> hiddenApps;
@@ -50,6 +52,10 @@ final class Config {
     final int backgroundColor;
     /** Full-screen picture behind the launcher, or null for the plain colour. */
     final File wallpaper;
+    /** Folder of pictures that rotate behind the launcher (WallpaperRotation), or null when not set. */
+    final File wallpaperFolder;
+    /** Minutes between wallpaper changes from {@link #wallpaperFolder}; 0 never rotates. */
+    final int wallpaperRotateMinutes;
     /** Whether the overlay file was present and parsed. */
     final boolean overlayApplied;
 
@@ -58,7 +64,7 @@ final class Config {
                    int columns, int rowsBelowDock,
                    boolean shamsiDate, boolean moduleCards, boolean reducedMotion, String vpnApp,
                    boolean showHomeSettingsShortcut, int backgroundColor,
-                   File wallpaper, boolean overlayApplied) {
+                   File wallpaper, File wallpaperFolder, int wallpaperRotateMinutes, boolean overlayApplied) {
         this.dockApps = Collections.unmodifiableList(dockApps);
         this.hiddenApps = Collections.unmodifiableList(hiddenApps);
         this.liveTvPackage = liveTvPackage;
@@ -75,6 +81,8 @@ final class Config {
         this.showHomeSettingsShortcut = showHomeSettingsShortcut;
         this.backgroundColor = backgroundColor;
         this.wallpaper = wallpaper;
+        this.wallpaperFolder = wallpaperFolder;
+        this.wallpaperRotateMinutes = wallpaperRotateMinutes;
         this.overlayApplied = overlayApplied;
     }
 
@@ -99,6 +107,8 @@ final class Config {
         boolean reducedMotion = res.getBoolean(R.bool.reduced_motion);
         String vpn = res.getString(R.string.vpn_app).trim();
         boolean homeSettings = res.getBoolean(R.bool.show_home_settings_shortcut);
+        String wallpaperFolder = res.getString(R.string.wallpaper_folder).trim();
+        int rotateMinutes = res.getInteger(R.integer.wallpaper_rotate_minutes);
         int background = 0xFF000000;
         boolean applied = false;
 
@@ -122,6 +132,8 @@ final class Config {
             vpn = string(json, "vpn_app", vpn);
             homeSettings = bool(json, "show_home_settings_shortcut", homeSettings);
             background = color(json, "background_color", background);
+            wallpaperFolder = string(json, "wallpaper_folder", wallpaperFolder);
+            rotateMinutes = integer(json, "wallpaper_rotate_minutes", rotateMinutes, 0, MAX_ROTATE_MINUTES);
         }
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
@@ -130,7 +142,8 @@ final class Config {
 
         return new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
                 Math.max(1, columns), Math.max(0, rowsBelow), shamsi, moduleCards, reducedMotion,
-                vpn, homeSettings, background, wallpaper, applied);
+                vpn, homeSettings, background, wallpaper,
+                wallpaperFolder.isEmpty() ? null : new File(wallpaperFolder), Math.max(0, rotateMinutes), applied);
     }
 
     /** Reads and parses the overlay; any problem means "no overlay", never a crash on the home screen. */

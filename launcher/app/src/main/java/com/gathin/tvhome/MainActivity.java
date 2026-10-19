@@ -37,6 +37,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -76,6 +77,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** Tiles per row and dock slots (res/values/config.xml, columns). Set in onCreate. */
     static int COLUMNS = 4;
     private static final long MINUTE_MS = 60_000L;
+    private static final String TAG = "TvHome";
     private String liveTvPkg;
     private String liveTvAction;
     private String inputAction;
@@ -122,6 +124,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean promptsPaused;
     /** The Inputs or Module cards dropdown while one is open, so onPause can close it. */
     private PopupWindow openPopup;
+    /** A theme's wallpaper.jpg; shown when the wallpaper folder is not set or has no pictures. */
+    private File themeWallpaper;
+    /** Folder of rotating pictures (config.xml, wallpaper_folder), or null. */
+    private File wallpaperFolder;
+    private long wallpaperRotateMs;
+    /** The one view that holds the wallpaper, created on the first picture. */
+    private ImageView wallpaperView;
+    /** Path of the picture in wallpaperView, so an unchanged choice is not decoded again. */
+    private String shownWallpaperPath;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     /** Refreshes the network pill when the connection changes: at boot Wi-Fi often connects after Home is shown. */
@@ -175,6 +186,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         public void run() {
             updateGreeting();
             updateWifiLabel();
+            updateWallpaper();
             handler.postDelayed(this, MINUTE_MS);
         }
     };
@@ -196,7 +208,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         root = findViewById(R.id.root);
         root.setBackgroundColor(cfg.backgroundColor);
-        if (cfg.wallpaper != null) showWallpaper(cfg.wallpaper);
+        themeWallpaper = cfg.wallpaper;
+        wallpaperFolder = cfg.wallpaperFolder;
+        wallpaperRotateMs = cfg.wallpaperRotateMinutes * MINUTE_MS;
+        updateWallpaper();
         glass = findViewById(R.id.glass);
         ambient = findViewById(R.id.ambient);
         heroName = findViewById(R.id.heroName);
@@ -337,10 +352,35 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     /**
-     * A theme's full-screen picture behind everything. Decoded once, downsampled to the screen so a 4K
-     * JPEG costs a 1080p bitmap at most (about 8 MB), which is the price of a wallpaper on a 1 GB TV.
+     * Shows the picture WallpaperRotation picks from the wallpaper folder, or the theme's wallpaper.jpg
+     * when the folder is not set, unreadable or empty. Called on create, on resume and every minute.
      */
-    private void showWallpaper(File file) {
+    private void updateWallpaper() {
+        File picked = pickFolderWallpaper();
+        File file = picked != null ? picked : themeWallpaper;
+        if (file == null || file.getPath().equals(shownWallpaperPath)) return;
+        if (showWallpaper(file)) {
+            shownWallpaperPath = file.getPath();
+            Log.i(TAG, "wallpaper: " + file);
+        }
+    }
+
+    /** The folder picture to show now, with the rotation state saved; null when there is none. */
+    private File pickFolderWallpaper() {
+        List<WallpaperRotation.Picture> pictures = WallpaperFolder.list(wallpaperFolder);
+        if (pictures == null) return null;
+        WallpaperRotation.State state = WallpaperRotation.choose(
+                pictures, WallpaperFolder.load(this), System.currentTimeMillis(), wallpaperRotateMs);
+        WallpaperFolder.save(this, state);
+        return state.current != null ? new File(wallpaperFolder, state.current) : null;
+    }
+
+    /**
+     * Full-screen picture behind everything. Decoded downsampled to the screen so a 4K JPEG costs a 1080p
+     * bitmap at most (about 8 MB), which is the price of a wallpaper on a 1 GB TV. The previous bitmap is
+     * released, so a rotation never holds two. Returns false when the file cannot be decoded.
+     */
+    private boolean showWallpaper(File file) {
         try {
             android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
             android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
@@ -352,13 +392,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             opts.inSampleSize = sample;
             opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;   // no alpha needed, half the memory
             android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(file.getPath(), opts);
-            if (bmp == null) return;
-            android.widget.ImageView wall = new android.widget.ImageView(this);
-            wall.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-            wall.setImageBitmap(bmp);
-            root.addView(wall, 0, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            if (bmp == null) {
+                Log.w(TAG, "cannot decode wallpaper " + file);
+                return false;
+            }
+            if (wallpaperView == null) {
+                wallpaperView = new ImageView(this);
+                wallpaperView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                root.addView(wallpaperView, 0, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+            android.graphics.drawable.Drawable old = wallpaperView.getDrawable();
+            wallpaperView.setImageBitmap(bmp);
+            if (old instanceof android.graphics.drawable.BitmapDrawable) {
+                ((android.graphics.drawable.BitmapDrawable) old).getBitmap().recycle();
+            }
+            return true;
         } catch (Exception | OutOfMemoryError e) {
-            // A bad or huge picture must never take the home screen down; the plain colour stays.
+            // A bad or huge picture must never take the home screen down; the current picture or colour stays.
+            Log.w(TAG, "wallpaper " + file + " failed", e);
+            return false;
         }
     }
 
@@ -390,6 +442,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         updateGreeting();
         updateWifiLabel();
         updateInputsButton();
+        updateWallpaper();
         handler.postDelayed(minuteTick, MINUTE_MS);
     }
 

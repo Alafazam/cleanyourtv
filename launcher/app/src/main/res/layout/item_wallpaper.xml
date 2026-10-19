@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One thumbnail in the Wallpaper pop-up. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="192dp"
+    android:layout_height="108dp"
+    android:layout_margin="6dp"
+    android:padding="3dp"
+    android:background="@drawable/wallpaper_thumb_bg"
+    android:focusable="true"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/thumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="6dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:background="@drawable/wallpaper_badge_bg"
+        android:text="@string/wallpaper_current"
+        android:textColor="#FF111111"
+        android:textSize="11sp"
+        android:fontFamily="@font/outfit"
+        android:visibility="gone" />
+</FrameLayout>

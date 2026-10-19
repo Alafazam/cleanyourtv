@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Now" label on the current picture in the Wallpaper pop-up: solid, so it reads on any photo. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#F5FFFFFF" />
+    <corners android:radius="10dp" />
+</shape>

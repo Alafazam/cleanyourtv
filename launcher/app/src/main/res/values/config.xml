@@ -77,4 +77,12 @@
          tiles that zoom without overshoot, shorter fades and no tile entrance when Home comes back. Set it
          here or with "reduced_motion": true in a theme's config.json; false keeps the normal motion. -->
     <bool name="reduced_motion">false</bool>
+
+    <!-- Folder of pictures (.jpg, .jpeg, .png, .webp) that rotate behind the launcher, e.g. /sdcard/Wallpapers.
+         A picture added to it (from a phone with Send Files to TV, say) shows at once. It replaces a theme's
+         wallpaper.jpg while the folder has pictures. Empty: off. Needs READ_EXTERNAL_STORAGE, which the install
+         script grants. -->
+    <string name="wallpaper_folder" translatable="false">/sdcard/Wallpapers</string>
+    <!-- Minutes between wallpaper changes while Home is open; 0 never rotates (a new picture still shows). -->
+    <integer name="wallpaper_rotate_minutes">30</integer>
 </resources>

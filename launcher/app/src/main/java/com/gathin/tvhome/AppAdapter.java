@@ -53,7 +53,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     }
 
     static final class Entry {
-        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2;
+        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, WALLPAPER = 3;
 
         final int kind;
         final String label;
@@ -117,6 +117,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     private final boolean showHomeSettings;
     /** Calmer motion for weak GPUs (config.xml, reduced_motion): no overshoot, shorter fades. */
     private final boolean reducedMotion;
+    /** Shows the Wallpaper tile, which opens the picker, when a wallpaper folder is set. */
+    private final boolean showWallpaperTile;
     private final List<Entry> items = new ArrayList<>();
 
     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
@@ -127,6 +129,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         this.hidden = new HashSet<>(cfg.hiddenApps);
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
         this.reducedMotion = cfg.reducedMotion;
+        this.showWallpaperTile = cfg.wallpaperFolder != null;
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
         // its view being rebound to whatever app now sits in that slot.
         setHasStableIds(true);
@@ -178,6 +181,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             fresh.add(new Entry(Entry.HOME_SETTINGS, ctx.getString(R.string.home_settings),
                     new ComponentName(ctx, HomeSettingsActivity.class), null,
                     ctx.getDrawable(R.drawable.ic_home_settings), null, 0));
+        }
+        // Wallpaper tile at the end of the grid: opens the picker for the wallpaper folder.
+        if (showWallpaperTile) {
+            fresh.add(new Entry(Entry.WALLPAPER, ctx.getString(R.string.wallpaper),
+                    new ComponentName(ctx, WallpaperPickerActivity.class), null,
+                    ctx.getDrawable(R.drawable.ic_wallpaper), null, 0));
         }
         items.clear();
         items.addAll(fresh);
@@ -259,6 +268,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         if (e.kind == Entry.HOME_SETTINGS) {
             ctx.startActivity(new Intent(ctx, HomeSettingsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            return;
+        }
+        if (e.kind == Entry.WALLPAPER) {
+            ctx.startActivity(new Intent(ctx, WallpaperPickerActivity.class));
             return;
         }
         Intent i = new Intent(Intent.ACTION_MAIN)
