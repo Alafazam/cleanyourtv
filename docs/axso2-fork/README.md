@@ -19,7 +19,8 @@ This branch is the reference launcher (v2.3) with two changes for one TV, a Xiao
 2. **Wallpaper tile and pop-up.** A Wallpaper tile at the end of the app grid opens a pop-up with the
    thumbnails. OK on one makes it the wallpaper and restarts the 30 minutes. Back closes it.
 3. **Personal config.** An eight-app dock (Netflix, Prime Video, YouTube, JioHotstar, JioCinema, Spotify,
-   SonyLIV, Zee5) in one row with `columns` 8, and `com.android.tv` as the Live TV app.
+   SonyLIV, Zee5) in one row with `columns` 8, `com.android.tv` as the Live TV app, and no dark band
+   behind the dock (`dock_band` false), so the dock sits on the wallpaper like the grid rows.
 
 Settings in `launcher/app/src/main/res/values/config.xml`, also accepted in a theme's `config.json`:
 
@@ -27,6 +28,7 @@ Settings in `launcher/app/src/main/res/values/config.xml`, also accepted in a th
 |---|---|---|
 | `wallpaper_folder` | `/sdcard/Wallpapers` | Folder of pictures; empty turns the feature and the tile off |
 | `wallpaper_rotate_minutes` | `30` | Minutes between changes; `0` never rotates (a new picture still shows) |
+| `dock_band` | `false` | The darker rounded band behind the dock row; the reference launcher always draws it |
 
 ## How it works
 

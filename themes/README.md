@@ -37,6 +37,7 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `show_home_settings_shortcut` | bool | The "Default home" tile, where the TV has a home picker |
 | `background_color` | `#RRGGBB` | Colour behind everything; black by default |
 | `wallpaper` | bool | Show `wallpaper.jpg` from the theme folder (`true`), or ignore it (`false`) |
+| `dock_band` | bool | The darker rounded band behind the dock row (`true`); `false` puts the dock tiles straight on the wallpaper |
 | `wallpaper_folder` | string | Folder of pictures that rotate behind the launcher, e.g. `/sdcard/Wallpapers`; empty turns it off. While it has pictures it replaces `wallpaper.jpg`. A Wallpaper tile in the grid opens a pop-up to pick one |
 | `wallpaper_rotate_minutes` | 0 to 1440 | Minutes between changes while Home is open; `0` never rotates. A newly added picture always shows at once |
 
