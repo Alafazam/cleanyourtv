@@ -9,6 +9,10 @@ This branch is the reference launcher (v2.3) with two changes for one TV, a Xiao
 |---|---|---|
 | ![Home with a mosque at sunset behind the dock](home.jpg) | ![The Wallpaper tile at the end of the app grid](tile.jpg) | ![The pop-up with twelve thumbnails, the current one marked Now](picker.jpg) |
 
+| Prayer line on Home | Prayer Times page | Screensaver |
+|---|---|---|
+| ![Current and next prayer in a glass pill under the clock](prayer-home.jpg) | ![Six prayer cards with the next one highlighted](prayer-page.jpg) | ![Clock and prayer times over a photo](prayer-screensaver.jpg) |
+
 ## What it changes
 
 1. **Rotating wallpaper folder.** Pictures in `/sdcard/Wallpapers` (`.jpg`, `.jpeg`, `.png`, `.webp`) show
