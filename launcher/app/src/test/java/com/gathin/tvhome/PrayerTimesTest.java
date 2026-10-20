@@ -63,7 +63,14 @@ public class PrayerTimesTest {
     }
 
     @Test
+    public void anEmptyTimeZoneMeansTheTvsOwn() {
+        PrayerTimes.Place p = PrayerTimes.Place.parse("X", "12.9716", "77.5946", "", 18, 18, 2);
+        assertEquals(java.time.ZoneId.systemDefault(), p.zone);
+    }
+
+    @Test
     public void invalidPlaceValuesTurnPrayerTimesOff() {
+        assertNull(PrayerTimes.Place.parse("X", "", "", "", 18, 18, 1));
         assertNull(PrayerTimes.Place.parse("X", "abc", "77", "Asia/Kolkata", 18, 18, 2));
         assertNull(PrayerTimes.Place.parse("X", "12.9", "77.5", "Not/AZone", 18, 18, 2));
         assertNull(PrayerTimes.Place.parse("X", "60", "10", "Europe/Oslo", 18, 18, 2));

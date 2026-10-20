@@ -100,7 +100,10 @@ final class PrayerTimes {
             this.asrFactor = asrFactor;
         }
 
-        /** Null when a value is missing or out of range, so a typo turns prayer times off instead of showing wrong ones. */
+        /**
+         * Null when a value is missing or out of range, so a typo turns prayer times off instead of showing wrong
+         * ones. An empty {@code zone} means the TV's own time zone.
+         */
         static Place parse(String city, String latitude, String longitude, String zone,
                            int fajrAngle, int ishaAngle, int asrFactor) {
             try {
@@ -108,7 +111,8 @@ final class PrayerTimes {
                 double lon = Double.parseDouble(longitude);
                 if (Math.abs(lat) > MAX_LATITUDE || Math.abs(lon) > 180) return null;
                 if (asrFactor < 1 || asrFactor > 2) return null;
-                return new Place(city, lat, lon, ZoneId.of(zone), fajrAngle, ishaAngle, asrFactor);
+                return new Place(city, lat, lon, zone.isEmpty() ? ZoneId.systemDefault() : ZoneId.of(zone),
+                        fajrAngle, ishaAngle, asrFactor);
             } catch (NumberFormatException | DateTimeException e) {
                 return null;
             }
