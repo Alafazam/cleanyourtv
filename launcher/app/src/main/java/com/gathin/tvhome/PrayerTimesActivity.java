@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.ImageView;
@@ -25,7 +24,6 @@ public class PrayerTimesActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService decoder = Executors.newSingleThreadExecutor();
     private Config cfg;
-    private boolean twentyFourHour;
 
     private final Runnable tick = new Runnable() {
         @Override
@@ -45,7 +43,6 @@ public class PrayerTimesActivity extends Activity {
             return;
         }
         setContentView(R.layout.activity_prayer_times);
-        twentyFourHour = DateFormat.is24HourFormat(this);
         loadBackdrop();
     }
 
@@ -70,7 +67,7 @@ public class PrayerTimesActivity extends Activity {
 
     private void refresh() {
         PrayerUi.Day day = PrayerUi.today(cfg);
-        if (day != null) PrayerUi.bindPanel(findViewById(R.id.prayerPanel), day, twentyFourHour);
+        if (day != null) PrayerUi.bindPanel(findViewById(R.id.prayerPanel), day);
     }
 
     /** The current wallpaper from the folder, else the theme's wallpaper.jpg, else plain black. */

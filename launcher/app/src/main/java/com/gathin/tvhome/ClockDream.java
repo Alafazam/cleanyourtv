@@ -9,7 +9,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.dreams.DreamService;
-import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -147,7 +146,7 @@ public class ClockDream extends DreamService {
     private void bindPrayer() {
         if (prayerPanel == null) return;
         PrayerUi.Day day = PrayerUi.today(prayerConfig);
-        if (day != null) PrayerUi.bindPanel(prayerPanel, day, DateFormat.is24HourFormat(this));
+        if (day != null) PrayerUi.bindPanel(prayerPanel, day);
     }
 
     /** Decodes the next picture by name on the decoder thread, then fades it in over the current one. */

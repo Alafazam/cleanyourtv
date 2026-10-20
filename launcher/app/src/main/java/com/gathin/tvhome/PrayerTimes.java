@@ -3,17 +3,21 @@ package com.gathin.tvhome;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.text.DateFormatSymbols;
 import java.time.chrono.HijrahDate;
 import java.time.temporal.ChronoField;
+import java.util.Locale;
 
 /**
  * Daily prayer times and the Hijri date, computed on the TV with no network. Pure Java, no Android, so it is
  * tested on the JVM against published timetables (PrayerTimesTest).
  *
- * The sun-position maths is the public PrayTimes.org method, the same that Aladhan and most timetables use:
- * Fajr and Isha are when the sun is a set angle below the horizon, Sunrise and Maghrib at 0.833 degrees
- * (refraction and the sun's radius), Dhuhr at solar noon, and Asr when an object's shadow is
- * {@code asrFactor} times its length plus its noon shadow (1 Shafi'i, 2 Hanafi).
+ * The sun's position comes from the US Naval Observatory's "approximate solar coordinates" (public domain,
+ * good to about a minute between 1800 and 2200), and each time from the standard hour-angle formula, the same
+ * astronomy most timetables (Aladhan, PrayTimes) use: Fajr and Isha are when the sun is a set angle below the
+ * horizon, Sunrise and Maghrib at 0.833 degrees (refraction and the sun's radius), Dhuhr at solar noon, and Asr
+ * when an object's shadow is {@code asrFactor} times its length plus its noon shadow (1 Shafi'i, 2 Hanafi).
+ * Words shown to people come in through {@link Words}, so the rules here stay testable and the text translatable.
  */
 final class PrayerTimes {
 
@@ -21,7 +25,22 @@ final class PrayerTimes {
     static final int COUNT = 6;
     static final int MINUTES_PER_DAY = 24 * 60;
 
-    /** English names, in index order. */
+    /** The words around the times, from strings.xml on the TV and plain English in the tests. */
+    interface Words {
+        /** "Now Dhuhr 12:04 PM". */
+        String now(String name, String time);
+        /** "Next Asr 4:21 PM, in 1 h 10 min". */
+        String next(String name, String time, String countdown);
+        String inMinutes(int minutes);
+        String inHours(int hours);
+        String inHoursMinutes(int hours, int minutes);
+        /** "Fajr and Isha 18°" or "Fajr 18°, Isha 17°". */
+        String angles(int fajr, int isha);
+        /** "Hanafi Asr" or "Shafi'i Asr". */
+        String asr(boolean hanafi);
+    }
+
+    /** Transliterated names, in index order; the same in every language. */
     static final String[] NAMES = {"Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"};
     /** Arabic names, in index order. */
     static final String[] ARABIC = {"الفجر", "الشروق", "الظهر", "العصر", "المغرب", "العشاء"};
@@ -102,9 +121,8 @@ final class PrayerTimes {
         }
 
         /** "Fajr and Isha 18° · Hanafi Asr". */
-        String methodLabel() {
-            String angles = fajrAngle == ishaAngle ? "Fajr and Isha " + fajrAngle + "°" : "Fajr " + fajrAngle + "°, Isha " + ishaAngle + "°";
-            return angles + " · " + (asrFactor == 2 ? "Hanafi" : "Shafi'i") + " Asr";
+        String methodLabel(Words w) {
+            return w.angles(fajrAngle, ishaAngle) + " · " + w.asr(asrFactor == 2);
         }
     }
 
@@ -182,33 +200,38 @@ final class PrayerTimes {
         return h.get(ChronoField.DAY_OF_MONTH) + " " + HIJRI_MONTHS[month - 1] + " " + h.get(ChronoField.YEAR);
     }
 
-    /** "4:59 AM" style, or "16:59" when {@code twentyFourHour}. Minutes may be outside 0..1439; they wrap. */
-    static String format(int minutes, boolean twentyFourHour) {
+    /**
+     * "4:59 AM" style with {@code locale}'s AM/PM, or "16:59" when {@code twentyFourHour}. Minutes may be outside
+     * 0..1439; they wrap.
+     */
+    static String format(int minutes, boolean twentyFourHour, Locale locale) {
         int m = Math.floorMod(minutes, MINUTES_PER_DAY);
         int h = m / 60;
         int min = m % 60;
-        if (twentyFourHour) return String.format(java.util.Locale.ROOT, "%02d:%02d", h, min);
+        if (twentyFourHour) return String.format(Locale.ROOT, "%02d:%02d", h, min);
         int h12 = h % 12 == 0 ? 12 : h % 12;
-        return String.format(java.util.Locale.ROOT, "%d:%02d %s", h12, min, h < 12 ? "AM" : "PM");
+        String[] amPm = DateFormatSymbols.getInstance(locale).getAmPmStrings();
+        return String.format(Locale.ROOT, "%d:%02d %s", h12, min, amPm[h < 12 ? 0 : 1]);
     }
 
     /**
      * The line under the Home clock: "Now Dhuhr 12:04 PM · Next Asr 4:21 PM, in 1 h 10 min". Between Sunrise and
      * Dhuhr no prayer is due, so that part reads "Sunrise 6:11 AM" without "Now".
      */
-    static String homeLine(Status s, boolean twentyFourHour) {
-        String current = (s.current == SUNRISE ? "" : "Now ") + NAMES[s.current] + " " + format(s.currentMinutes, twentyFourHour);
-        return current
-                + "   ·   Next " + NAMES[s.next] + " " + format(s.nextMinutes, twentyFourHour) + ", " + countdown(s.minutesUntilNext);
+    static String homeLine(Status s, boolean twentyFourHour, Locale locale, Words w) {
+        String currentTime = format(s.currentMinutes, twentyFourHour, locale);
+        String current = s.current == SUNRISE ? NAMES[SUNRISE] + " " + currentTime : w.now(NAMES[s.current], currentTime);
+        return current + "   ·   "
+                + w.next(NAMES[s.next], format(s.nextMinutes, twentyFourHour, locale), countdown(s.minutesUntilNext, w));
     }
 
     /** "in 1 h 10 min", "in 25 min", "in 1 h". */
-    static String countdown(int minutes) {
+    static String countdown(int minutes, Words w) {
         int h = minutes / 60;
         int m = minutes % 60;
-        if (h == 0) return "in " + m + " min";
-        if (m == 0) return "in " + h + " h";
-        return "in " + h + " h " + m + " min";
+        if (h == 0) return w.inMinutes(m);
+        if (m == 0) return w.inHours(h);
+        return w.inHoursMinutes(h, m);
     }
 
     // --- sun position (PrayTimes.org) ---

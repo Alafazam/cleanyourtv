@@ -3,6 +3,7 @@ package com.gathin.tvhome;
 import org.junit.Test;
 
 import java.time.LocalDate;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -17,6 +18,17 @@ public class PrayerTimesTest {
     /** Published times may round differently by a minute. */
     private static final int TOLERANCE_MIN = 1;
 
+    /** The English strings from values/strings.xml. */
+    private static final PrayerTimes.Words ENGLISH = new PrayerTimes.Words() {
+        @Override public String now(String name, String time) { return "Now " + name + " " + time; }
+        @Override public String next(String name, String time, String countdown) { return "Next " + name + " " + time + ", " + countdown; }
+        @Override public String inMinutes(int m) { return "in " + m + " min"; }
+        @Override public String inHours(int h) { return "in " + h + " h"; }
+        @Override public String inHoursMinutes(int h, int m) { return "in " + h + " h " + m + " min"; }
+        @Override public String angles(int f, int i) { return f == i ? "Fajr and Isha " + f + "°" : "Fajr " + f + "°, Isha " + i + "°"; }
+        @Override public String asr(boolean hanafi) { return hanafi ? "Hanafi Asr" : "Shafi'i Asr"; }
+    };
+
     private static int hm(String hhmm) {
         String[] p = hhmm.split(":");
         return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
@@ -28,7 +40,7 @@ public class PrayerTimesTest {
         for (int i = 0; i < PrayerTimes.COUNT; i++) {
             int diff = Math.abs(got[i] - hm(expected[i]));
             assertTrue(date + " " + PrayerTimes.NAMES[i] + ": expected " + expected[i] + ", got "
-                    + PrayerTimes.format(got[i], true), diff <= TOLERANCE_MIN);
+                    + PrayerTimes.format(got[i], true, Locale.ENGLISH), diff <= TOLERANCE_MIN);
         }
     }
 
@@ -47,7 +59,7 @@ public class PrayerTimesTest {
         LocalDate d = LocalDate.of(2026, 10, 20);
         assertEquals(5.5, p.settingsFor(d).utcOffsetHours, 0.0001);
         assertEquals(PrayerTimes.compute(d, BENGALURU)[PrayerTimes.DHUHR], PrayerTimes.compute(d, p.settingsFor(d))[PrayerTimes.DHUHR]);
-        assertEquals("Fajr and Isha 18° · Hanafi Asr", p.methodLabel());
+        assertEquals("Fajr and Isha 18° · Hanafi Asr", p.methodLabel(ENGLISH));
     }
 
     @Test
@@ -104,29 +116,31 @@ public class PrayerTimesTest {
     @Test
     public void homeLineSaysNowAndNext() {
         PrayerTimes.Status s = PrayerTimes.status(DAY, TOMORROW_FAJR, hm("15:11"));
-        assertEquals("Now Dhuhr 12:04 PM   ·   Next Asr 4:21 PM, in 1 h 10 min", PrayerTimes.homeLine(s, false));
+        assertEquals("Now Dhuhr 12:04 PM   ·   Next Asr 4:21 PM, in 1 h 10 min",
+                PrayerTimes.homeLine(s, false, Locale.ENGLISH, ENGLISH));
     }
 
     @Test
     public void homeLineAfterSunriseHasNoNow() {
         PrayerTimes.Status s = PrayerTimes.status(DAY, TOMORROW_FAJR, hm("09:35"));
-        assertEquals("Sunrise 6:11 AM   ·   Next Dhuhr 12:04 PM, in 2 h 29 min", PrayerTimes.homeLine(s, false));
+        assertEquals("Sunrise 6:11 AM   ·   Next Dhuhr 12:04 PM, in 2 h 29 min",
+                PrayerTimes.homeLine(s, false, Locale.ENGLISH, ENGLISH));
     }
 
     @Test
     public void formatsTwelveAndTwentyFourHourTimes() {
-        assertEquals("4:59 AM", PrayerTimes.format(hm("04:59"), false));
-        assertEquals("12:04 PM", PrayerTimes.format(hm("12:04"), false));
-        assertEquals("12:30 AM", PrayerTimes.format(hm("00:30"), false));
-        assertEquals("19:09", PrayerTimes.format(hm("19:09"), true));
-        assertEquals("4:59 AM", PrayerTimes.format(hm("04:59") + PrayerTimes.MINUTES_PER_DAY, false));
+        assertEquals("4:59 AM", PrayerTimes.format(hm("04:59"), false, Locale.ENGLISH));
+        assertEquals("12:04 PM", PrayerTimes.format(hm("12:04"), false, Locale.ENGLISH));
+        assertEquals("12:30 AM", PrayerTimes.format(hm("00:30"), false, Locale.ENGLISH));
+        assertEquals("19:09", PrayerTimes.format(hm("19:09"), true, Locale.ENGLISH));
+        assertEquals("4:59 AM", PrayerTimes.format(hm("04:59") + PrayerTimes.MINUTES_PER_DAY, false, Locale.ENGLISH));
     }
 
     @Test
     public void countdownReadsNaturally() {
-        assertEquals("in 25 min", PrayerTimes.countdown(25));
-        assertEquals("in 1 h", PrayerTimes.countdown(60));
-        assertEquals("in 1 h 10 min", PrayerTimes.countdown(70));
+        assertEquals("in 25 min", PrayerTimes.countdown(25, ENGLISH));
+        assertEquals("in 1 h", PrayerTimes.countdown(60, ENGLISH));
+        assertEquals("in 1 h 10 min", PrayerTimes.countdown(70, ENGLISH));
     }
 
     @Test

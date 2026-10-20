@@ -24,6 +24,20 @@
     <string name="vpn_off">VPN off</string>
     <string name="wallpaper">Wallpaper</string>
     <string name="prayer_times_title">Prayer Times</string>
+    <!-- Prayer times. %1$s is a prayer name (Fajr, Dhuhr...), %2$s a time, %3$s a countdown such as "in 1 h 10 min". -->
+    <string name="prayer_now">Now %1$s %2$s</string>
+    <string name="prayer_next">Next %1$s %2$s, %3$s</string>
+    <string name="prayer_headline">%1$s %2$s</string>
+    <string name="prayer_in_minutes">in %1$d min</string>
+    <string name="prayer_in_hours">in %1$d h</string>
+    <string name="prayer_in_hours_minutes">in %1$d h %2$d min</string>
+    <string name="prayer_angles_same">Fajr and Isha %1$d°</string>
+    <string name="prayer_angles">Fajr %1$d°, Isha %2$d°</string>
+    <string name="prayer_asr_hanafi">Hanafi Asr</string>
+    <string name="prayer_asr_shafii">Shafi\'i Asr</string>
+    <string name="prayer_calculated">calculated on this TV</string>
+    <!-- %1$s is a Hijri date such as "9 Jumada al-Ula 1448"; AH is "anno Hegirae". -->
+    <string name="prayer_hijri">%1$s AH</string>
     <string name="wallpaper_current">Now</string>
     <string name="wallpaper_hint">Pick a picture. Pictures change every %1$d minutes; a new one sent to %2$s shows at once.</string>
     <string name="wallpaper_hint_fixed">Pick a picture. A new one sent to %1$s shows at once.</string>

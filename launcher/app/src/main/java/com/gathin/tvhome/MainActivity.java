@@ -863,7 +863,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** "Now Dhuhr 12:04 PM · Next Asr 4:21 PM, in 1 h 10 min" under the clock. */
     private void updatePrayerLine() {
         PrayerUi.Day day = PrayerUi.today(prayerConfig);
-        if (day != null) prayerLine.setText(PrayerTimes.homeLine(day.status, android.text.format.DateFormat.is24HourFormat(this)));
+        if (day != null) prayerLine.setText(PrayerUi.homeLine(this, day));
     }
 
     private void updateGreeting() {
