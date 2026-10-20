@@ -19,10 +19,16 @@ do with screenshots pulled from the TV. Ask me before anything that depends on m
 
 Connect
 - Find the TV on my network (hostname, ARP table, or ask me for the IP) and connect over ADB on port 5555.
+  If the TV is in another home, I'll give you its Tailscale address instead (docs/REMOTE.md): use that,
+  don't scan my local network.
 - If the stock adb binary fails with "No route to host" on macOS even though the port is open, that is
   macOS Local Network privacy blocking adb. Don't debug it: use the Python `adb-shell` package in a venv
   as the ADB client instead. If its file push hangs on larger files, transfer files as base64 chunks
   through the shell and verify the md5.
+- If port 5555 stays closed, the TV may only offer Wireless debugging (Google TV sets often do): look for
+  `_adb-tls-connect._tcp` with `dns-sd -B` or `adb mdns services`, ask me for the code and port under
+  Developer options > Wireless debugging > Pair device with pairing code, then `adb pair`, `adb connect`
+  and `adb tcpip 5555`. Android switches Wireless debugging off whenever Wi-Fi drops.
 - Tell me when the "Allow USB debugging?" prompt will appear on the TV so I can accept it.
 - If `adb install` hangs on Android 14 it is waiting for an on-screen confirmation; push the APK and run
   `pm install -r` over the shell instead.
@@ -32,6 +38,10 @@ Back up first
   before changing anything, and write a restore script that re-enables everything you disable.
 - Ask me what is plugged into the TV's USB ports. Some devices cut their power while USB debugging
   is on, so warn me, and remind me to switch debugging off once you're done.
+- When you finish, close network ADB instead of leaving it open: switch USB debugging and
+  Network/ADB debugging off on the TV, revoke the USB debugging authorisations, reboot, and check
+  that `nc -vz <tv ip> 5555` fails. Port 5555 is plaintext, and on firmware with `ro.adb.secure=0`
+  any device on the LAN can get a shell.
 
 Debloat
 - List installed packages and sort them into: manufacturer telemetry/analytics, manufacturer content
@@ -67,7 +77,10 @@ Launcher
   android.intent.category.HOME` and set the default with `cmd package set-home-activity`.
 - Before disabling the stock launcher, check which other apps claim HOME: on Google TV the setup wizard
   (`com.google.android.tungsten.setupwraith`) takes over even after the stock launcher is disabled, and
-  the matching `examples/` header says what to do.
+  the matching `examples/` header says what to do. Before disabling setupwraith, run
+  `dumpsys wifi | grep -o 'cname=[^ ]*'`: a Wi-Fi network saved during first setup belongs to it, and
+  Android deletes that network the moment it is disabled, which takes the TV off Wi-Fi and ADB. If it
+  does, ask me to forget the network and re-join it in Settings first.
 - On Android 11 and newer the launcher must declare `<queries>` for `android.intent.category.LEANBACK_LAUNCHER`,
   or package visibility silently hides every app and the grid comes up empty; target a recent SDK, some
   Google TV 14 sets refuse older targets at install.
@@ -87,6 +100,8 @@ Launcher
 Verify
 - After each change, inject remote key presses over ADB, take a screenshot from the TV and look at it.
   Fix what you see before moving on.
+- Live TV and HDMI screenshots come back empty (0 bytes); that is the TV, not a broken debloat. Check
+  `dumpsys activity activities | grep topResumedActivity` instead (see `docs/TROUBLESHOOTING.md`).
 - If a remote button relies on an accessibility helper, check that the service is enabled and bound
   for the current user, then ask me to press the real button; an injected key is not proof (see
   `docs/TROUBLESHOOTING.md`).

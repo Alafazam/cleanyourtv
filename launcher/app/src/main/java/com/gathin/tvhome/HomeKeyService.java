@@ -17,18 +17,21 @@ import android.view.accessibility.AccessibilityEvent;
  */
 public class HomeKeyService extends AccessibilityService {
 
-    /** Scancodes of remote buttons that should open Settings (config.xml, settings_key_scancodes). */
+    /** Remote buttons that should open Settings (config.xml, settings_key_scancodes and settings_key_keycodes). */
     private int[] settingsScancodes = new int[0];
+    private int[] settingsKeycodes = new int[0];
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         settingsScancodes = getResources().getIntArray(R.array.settings_key_scancodes);
+        settingsKeycodes = getResources().getIntArray(R.array.settings_key_keycodes);
     }
 
     private boolean isSettingsKey(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_SETTINGS) return true;
         for (int code : settingsScancodes) if (event.getScanCode() == code) return true;
+        for (int code : settingsKeycodes) if (event.getKeyCode() == code) return true;
         return false;
     }
 

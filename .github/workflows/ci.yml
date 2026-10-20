@@ -39,11 +39,11 @@ jobs:
         with:
           packages: platforms;android-34 build-tools;34.0.0
       - uses: gradle/actions/setup-gradle@v4
-      - name: Unit tests and release build
+      - name: Unit tests, lint and release build
         working-directory: launcher
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon testReleaseUnitTest assembleRelease
+          ./gradlew --no-daemon testReleaseUnitTest lintRelease assembleRelease
       - name: The launcher stays small
         run: |
           size=$(stat -c %s launcher/app/build/outputs/apk/release/app-release.apk)

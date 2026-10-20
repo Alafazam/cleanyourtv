@@ -23,7 +23,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN wyłączony</string>
     <string name="home_settings">Domyślny ekran główny</string>
-    <string name="home_settings_help">Wybierz ekran główny w ustawieniach systemu, a potem naciśnij Home.</string>
+    <string name="home_settings_help">Wybierz oryginalny ekran główny, aby przestać używać CleanYourTV jako domyślnego, albo wybierz CleanYourTV, aby wrócić. Oryginalny launcher musi być włączony, a telewizor musi udostępniać wybór ekranu głównego. Jeśli został wyłączony, najpierw użyj skryptu przywracania.</string>
     <string name="input_key_service_description">Otwiera wybór wejścia po naciśnięciu przycisku Input na pilocie.</string>
     <string name="home_key_name">Przycisk Home</string>
     <string name="home_key_description">Sprawia, że przycisk Home na pilocie otwiera ten ekran główny.</string>
@@ -32,7 +32,7 @@
     <string name="card_prompt_names">Karta nazywa się „%1$s”. Aplikacja to „%2$s”.</string>
     <string name="card_prompt_resigned">Aplikacja %1$s została zaktualizowana z innym kluczem podpisu, więc Twoja wcześniejsza decyzja już nie obowiązuje. Zdecyduj ponownie o jej karcie.</string>
     <string name="card_prompt_relabelled">Aplikacja %1$s zmieniła nazwę swojej karty od czasu Twojej decyzji. Zdecyduj o niej ponownie.</string>
-    <string name="card_prompt_hint">Możesz to później zmienić: przytrzymaj OK na przycisku Ustawienia.</string>
+    <string name="card_prompt_hint">Możesz to później zmienić: przytrzymaj OK na przycisku Ustawienia i wybierz Karty aplikacji.</string>
     <string name="card_prompt_identity">%1$s, klucz %2$s</string>
     <string name="card_keep_hidden">Zostaw ukrytą</string>
     <string name="card_show">Pokaż kartę</string>
@@ -46,4 +46,16 @@
     <string name="card_state_new">Nowa</string>
     <string name="card_state_new_key">Nowy klucz</string>
     <string name="card_state_new_label">Nowa nazwa</string>
+    <string name="launcher_settings">Ustawienia ekranu głównego</string>
+    <string name="columns_label">Aplikacji w rzędzie</string>
+    <string name="animations_state">Animacje: %1$s</string>
+    <string name="advanced_effects">Efekty zaawansowane</string>
+    <string name="advanced_effects_state">Efekty zaawansowane: %1$s</string>
+    <string name="advanced_effects_warning">Unosi kafelki, powiększa ikony i wygładza przejścia kolorów. Może zwiększyć zużycie pamięci, zależnie od telewizora.</string>
+    <string name="follow_theme">Użyj motywu (zresetuj wybór)</string>
+    <string name="follow_theme_hint">Używa układu i animacji bieżącego motywu lub ustawień wbudowanych. Wgranie lub zresetowanie motywu także usuwa wybór na telewizorze.</string>
+    <string name="tv_settings">Ustawienia systemowe TV</string>
+    <string name="on">Wł.</string>
+    <string name="off">Wył.</string>
+    <string name="enable">Włącz</string>
 </resources>

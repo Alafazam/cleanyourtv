@@ -1,6 +1,7 @@
 package com.gathin.tvhome;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.Log;
@@ -32,6 +33,9 @@ final class Config {
     static final String WALLPAPER_NAME = "wallpaper.jpg";
     /** Longest wallpaper rotation a theme may set: one day. */
     static final int MAX_ROTATE_MINUTES = 24 * 60;
+    static final String SETTINGS_NAME = "launcher_settings";
+    private static final String THEME_REVISION_NAME = "theme_revision";
+    private static final String THEME_SIGNATURE_KEY = "theme_signature";
 
     final List<String> dockApps;
     final List<String> hiddenApps;
@@ -41,6 +45,8 @@ final class Config {
     final String sourcePanelAction;
     final String inputAction;
     final int columns;
+    final boolean animations;
+    final boolean advancedEffects;
     final int rowsBelowDock;
     final boolean shamsiDate;
     final boolean moduleCards;
@@ -52,6 +58,8 @@ final class Config {
     final boolean showHomeSettingsShortcut;
     /** Background colour behind everything, #RRGGBB; black unless a theme says otherwise. */
     final int backgroundColor;
+    /** Time-of-day backdrop, 0 to 100 (config.xml, sky_intensity); 0 keeps the plain background. */
+    final int skyIntensity;
     /** Full-screen picture behind the launcher, or null for the plain colour. */
     final File wallpaper;
     /** Folder of pictures that rotate behind the launcher (WallpaperRotation), or null when not set. */
@@ -63,9 +71,9 @@ final class Config {
 
     private Config(List<String> dockApps, List<String> hiddenApps, String liveTvPackage, String liveTvAction,
                    String sourcePanelService, String sourcePanelAction, String inputAction,
-                   int columns, int rowsBelowDock,
+                   int columns, int rowsBelowDock, boolean animations, boolean advancedEffects,
                    boolean shamsiDate, boolean moduleCards, boolean reducedMotion, boolean dockBand, String vpnApp,
-                   boolean showHomeSettingsShortcut, int backgroundColor,
+                   boolean showHomeSettingsShortcut, int backgroundColor, int skyIntensity,
                    File wallpaper, File wallpaperFolder, int wallpaperRotateMinutes, boolean overlayApplied) {
         this.dockApps = Collections.unmodifiableList(dockApps);
         this.hiddenApps = Collections.unmodifiableList(hiddenApps);
@@ -76,6 +84,8 @@ final class Config {
         this.inputAction = inputAction;
         this.columns = columns;
         this.rowsBelowDock = rowsBelowDock;
+        this.animations = animations;
+        this.advancedEffects = advancedEffects;
         this.shamsiDate = shamsiDate;
         this.moduleCards = moduleCards;
         this.reducedMotion = reducedMotion;
@@ -83,6 +93,7 @@ final class Config {
         this.vpnApp = vpnApp;
         this.showHomeSettingsShortcut = showHomeSettingsShortcut;
         this.backgroundColor = backgroundColor;
+        this.skyIntensity = skyIntensity;
         this.wallpaper = wallpaper;
         this.wallpaperFolder = wallpaperFolder;
         this.wallpaperRotateMinutes = wallpaperRotateMinutes;
@@ -105,6 +116,8 @@ final class Config {
         String inputAction = res.getString(R.string.input_action).trim();
         int columns = res.getInteger(R.integer.columns);
         int rowsBelow = res.getInteger(R.integer.rows_below_dock);
+        boolean animations = res.getBoolean(R.bool.animations);
+        boolean advancedEffects = res.getBoolean(R.bool.advanced_effects);
         boolean shamsi = res.getBoolean(R.bool.shamsi_date);
         boolean moduleCards = res.getBoolean(R.bool.module_cards);
         boolean reducedMotion = res.getBoolean(R.bool.reduced_motion);
@@ -114,6 +127,7 @@ final class Config {
         String wallpaperFolder = res.getString(R.string.wallpaper_folder).trim();
         int rotateMinutes = res.getInteger(R.integer.wallpaper_rotate_minutes);
         int background = 0xFF000000;
+        int skyIntensity = res.getInteger(R.integer.sky_intensity);
         boolean applied = false;
 
         File dir = dir(ctx);
@@ -130,6 +144,8 @@ final class Config {
             inputAction = string(json, "input_action", inputAction);
             columns = integer(json, "columns", columns, 1, 8);
             rowsBelow = integer(json, "rows_below_dock", rowsBelow, 0, 3);
+            animations = bool(json, "animations", animations);
+            advancedEffects = bool(json, "advanced_effects", advancedEffects);
             shamsi = bool(json, "shamsi_date", shamsi);
             moduleCards = bool(json, "module_cards", moduleCards);
             reducedMotion = bool(json, "reduced_motion", reducedMotion);
@@ -139,16 +155,59 @@ final class Config {
             background = color(json, "background_color", background);
             wallpaperFolder = string(json, "wallpaper_folder", wallpaperFolder);
             rotateMinutes = integer(json, "wallpaper_rotate_minutes", rotateMinutes, 0, MAX_ROTATE_MINUTES);
+            skyIntensity = integer(json, "sky_intensity", skyIntensity, 0, 100);
         }
+        // A theme push or reset invalidates choices made on the TV. On first use, remember the
+        // current theme without clearing choices from an older launcher version.
+        SharedPreferences choices = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
+        syncThemeChoices(choices, dir, file);
+        int chosenColumns = choices.getInt("columns", columns);
+        if (chosenColumns >= 4 && chosenColumns <= 7) columns = chosenColumns;
+        animations = choices.getBoolean("animations", animations);
+        advancedEffects = choices.getBoolean("advanced_effects", advancedEffects);
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.
         if (json != null && json.has("wallpaper") && !bool(json, "wallpaper", true)) wallpaper = null;
 
         return new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
-                Math.max(1, columns), Math.max(0, rowsBelow), shamsi, moduleCards, reducedMotion, dockBand,
-                vpn, homeSettings, background, wallpaper,
+                Math.max(1, columns), Math.max(0, rowsBelow), animations, advancedEffects,
+                shamsi, moduleCards, reducedMotion, dockBand, vpn, homeSettings, background,
+                Math.max(0, Math.min(100, skyIntensity)), wallpaper,
                 wallpaperFolder.isEmpty() ? null : new File(wallpaperFolder), Math.max(0, rotateMinutes), applied);
+    }
+
+    private static void syncThemeChoices(SharedPreferences choices, File dir, File config) {
+        File revision = dir == null ? null : new File(dir, THEME_REVISION_NAME);
+        String token = revisionToken(revision);
+        String signature = fileStamp(config) + ":" + token;
+        String seen = choices.getString(THEME_SIGNATURE_KEY, null);
+        if (seen == null) {
+            // Existing preferences survive an app upgrade, unless the first launch follows an
+            // explicit theme push or reset by the updated tools.
+            SharedPreferences.Editor editor = choices.edit();
+            if (!"absent".equals(token)) editor.remove("columns").remove("animations")
+                    .remove("advanced_effects");
+            editor.putString(THEME_SIGNATURE_KEY, signature).commit();
+        } else if (!seen.equals(signature)) {
+            choices.edit().remove("columns").remove("animations").remove("advanced_effects")
+                    .putString(THEME_SIGNATURE_KEY, signature).commit();
+        }
+    }
+
+    private static String fileStamp(File file) {
+        return file != null && file.isFile() ? file.length() + "@" + file.lastModified() : "absent";
+    }
+
+    private static String revisionToken(File file) {
+        if (file == null || !file.isFile() || file.length() > 64) return "absent";
+        try (InputStream in = new FileInputStream(file)) {
+            byte[] bytes = new byte[(int) file.length()];
+            int n = in.read(bytes);
+            return n > 0 ? new String(bytes, 0, n, StandardCharsets.US_ASCII) : "absent";
+        } catch (Exception ignored) {
+            return "absent";
+        }
     }
 
     /** Reads and parses the overlay; any problem means "no overlay", never a crash on the home screen. */
@@ -163,7 +222,7 @@ final class Config {
             int n = 0, r;
             while (n < buf.length && (r = in.read(buf, n, buf.length - n)) > 0) n += r;
             String text = new String(buf, 0, n, StandardCharsets.UTF_8);
-            if (text.startsWith("﻿")) text = text.substring(1);   // Windows editors add a BOM
+            if (text.startsWith("\uFEFF")) text = text.substring(1);   // Windows editors add a BOM
             return new JSONObject(text);
         } catch (Exception e) {
             Log.w(TAG, "ignoring " + file + ": " + e.getMessage());

@@ -20,8 +20,7 @@
         android:ellipsize="end"
         android:textColor="#FFFFFFFF"
         android:textSize="22sp"
-        android:fontFamily="@font/outfit"
-        android:fontVariationSettings="'wght' 500"
+        android:fontFamily="@font/outfit_medium"
         android:letterSpacing="-0.01" />
 
     <TextView

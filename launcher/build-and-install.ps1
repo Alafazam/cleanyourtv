@@ -66,11 +66,15 @@ if ("$out" -notmatch 'Success') { throw 'pm install failed; the stock launcher w
 $out = & $py -I ..\tools\tv.py 'cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity'
 Write-Host $out
 if ("$out" -match 'Error') { throw 'could not set the new launcher as home; the stock launcher was left untouched' }
+# Start the launcher on its own, before the stock Home is touched (see build-and-install.sh, #239):
+# in the batch a failed start only prints an Error line and the stock launcher would be disabled anyway.
+$start = (& $py -I ..\tools\tv.py 'am start -W -n com.gathin.tvhome/.MainActivity') -join "`n"
+Write-Host $start
+if ($start -notmatch 'Status: ok' -or $start -match '(?m)^Error') { throw "the new launcher did not start (see above); $StockLauncher was left enabled" }
 @(
     'pm grant com.gathin.tvhome android.permission.ACCESS_FINE_LOCATION 2>/dev/null; echo location-granted',
     'pm grant com.gathin.tvhome android.permission.READ_EXTERNAL_STORAGE 2>/dev/null; echo storage-granted',
     'cmd package compile -m speed -f com.gathin.tvhome',
-    "am start -W -n com.gathin.tvhome/.MainActivity | grep -E '^(Status|Error)'",
     $disableStock,
     'cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity'
 ) | & $py -I ..\tools\tv.py --batch
@@ -78,7 +82,11 @@ if ("$out" -match 'Error') { throw 'could not set the new launcher as home; the 
 # preference last, then check where Home ended up and put the stock launcher back if it is not ours.
 $homeNow = (& $py -I ..\tools\tv.py 'cmd package resolve-activity --brief -c android.intent.category.HOME -a android.intent.action.MAIN' | Select-Object -Last 1).Trim()
 if ($homeNow -notlike 'com.gathin.tvhome/*') {
-    if ($StockLauncher -ne 'none') { & $py -I ..\tools\tv.py "pm enable --user 0 $StockLauncher" | Out-Null }
+    if ($StockLauncher -ne 'none') {
+        & $py -I ..\tools\tv.py "pm enable --user 0 $StockLauncher" | Out-Null
+        # set-home-activity needs pkg/activity on Android 9, so resolve the stock component on the TV.
+        & $py -I ..\tools\tv.py "cmd package set-home-activity --user 0 `$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $StockLauncher | tail -n 1)" | Out-Null
+    }
     throw "Home resolves to '$homeNow', not to the new launcher; $StockLauncher was re-enabled. On Google TV this usually means com.google.android.tungsten.setupwraith also claims Home: add it to your debloat list (see README, Troubleshooting), apply it, then run this script again."
 }
 Write-Host "Home now resolves to $homeNow"

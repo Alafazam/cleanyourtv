@@ -19,4 +19,16 @@
     <string name="not_available">No disponible en aquest televisor</string>
     <string name="cant_open">No s\'ha pogut obrir %1$s</string>
     <string name="dream_name">Rellotge</string>
+    <string name="launcher_settings">Configuració del llançador</string>
+    <string name="columns_label">Aplicacions per fila</string>
+    <string name="animations_state">Animacions: %1$s</string>
+    <string name="advanced_effects">Efectes avançats</string>
+    <string name="advanced_effects_state">Efectes avançats: %1$s</string>
+    <string name="advanced_effects_warning">Eleva les targetes, amplia les icones i suavitza els canvis de color. Pot augmentar l’ús de memòria; depèn del televisor.</string>
+    <string name="follow_theme">Segueix el tema (restableix els ajustos)</string>
+    <string name="follow_theme_hint">Utilitza la disposició i els efectes del tema actual o els valors integrats. Aplicar o restablir un tema també esborra aquests ajustos.</string>
+    <string name="tv_settings">Configuració del televisor</string>
+    <string name="on">Activat</string>
+    <string name="off">Desactivat</string>
+    <string name="enable">Activa</string>
 </resources>

@@ -57,6 +57,7 @@ if [ -z "${STOCK_LAUNCHER:-}" ]; then
   esac
 fi
 echo "Stock launcher: $STOCK_LAUNCHER"
+HOME_QUERY='cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
 if [ "$STOCK_LAUNCHER" = none ]; then DISABLE_STOCK="echo stock launcher left alone"
 else DISABLE_STOCK="pm disable-user --user 0 $STOCK_LAUNCHER"; fi
 APK=app/build/outputs/apk/release/app-release.apk
@@ -69,27 +70,79 @@ case "$OUT" in
   *Success*) ;;
   *) echo "ERROR: pm install failed; the stock launcher was left untouched." >&2; exit 1 ;;
 esac
+# Start the launcher on its own, before the stock Home is touched. In the batch below a start that
+# fails only prints an "Error:" line, and the stock launcher would be disabled anyway, leaving the TV
+# with no usable Home (#239). "Status: ok" from `am start -W` means the activity really came up;
+# the HOME resolution further down only names a component, it does not prove the activity starts.
+START_OUT=$("$PY" -I ../tools/tv.py 'am start -W -n com.gathin.tvhome/.MainActivity')
+echo "$START_OUT"
+# Both halves matter: some builds answer "Status: ok" for a task that was merely brought to the
+# front, and an activity that cannot start still prints "Error: Activity not started".
+if ! printf '%s' "$START_OUT" | grep -qF 'Status: ok' || printf '%s' "$START_OUT" | grep -qi '^Error'; then
+  echo "ERROR: the new launcher did not start (see above); $STOCK_LAUNCHER was left enabled." >&2
+  exit 1
+fi
 printf '%s\n' \
   "pm grant com.gathin.tvhome android.permission.ACCESS_FINE_LOCATION 2>/dev/null; echo location-granted" \
   "pm grant com.gathin.tvhome android.permission.READ_EXTERNAL_STORAGE 2>/dev/null; echo storage-granted" \
   "cmd package compile -m speed -f com.gathin.tvhome" \
-  "am start -W -n com.gathin.tvhome/.MainActivity | grep -E '^(Status|Error)'" \
   "$DISABLE_STOCK" \
   "cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity" \
   | "$PY" -I ../tools/tv.py --batch
+
+# Home's owner, or an empty string when the TV cannot be reached (pipefail would otherwise make a
+# lost connection abort the script with no explanation).
+query_home() {
+  "$PY" -I ../tools/tv.py "$HOME_QUERY" 2>/dev/null | tail -n 1 | tr -d '\r' || true
+}
+
+# Put the stock launcher back and check that it took. A TV whose new Home does not start can only be
+# rescued over ADB, so the commands go into a local file as well: when it is the connection that
+# broke, the terminal that ran this script may never come back.
+rollback_home() {
+  if [ "$STOCK_LAUNCHER" = none ]; then
+    echo "ERROR: Home is not the new launcher, and no stock launcher was disabled; nothing to roll back." >&2
+    return 1
+  fi
+  "$PY" -I ../tools/tv.py "pm enable --user 0 $STOCK_LAUNCHER" >/dev/null 2>&1 || true
+  # set-home-activity needs pkg/activity on Android 9, so resolve the component on the TV first.
+  "$PY" -I ../tools/tv.py "cmd package set-home-activity --user 0 \$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $STOCK_LAUNCHER | tail -n 1)" >/dev/null 2>&1 || true
+  BACK=$(query_home)
+  case "$BACK" in
+    "$STOCK_LAUNCHER"/*) echo "$STOCK_LAUNCHER owns Home again." >&2; return 0 ;;
+  esac
+  REC="${HOME:-$PWD}/cleanyourtv-handover-$(printf '%s' "$TV_HOST" | tr -c 'A-Za-z0-9._-' '_').txt"
+  {
+    echo "# cleanyourtv: the launcher handover on $TV_HOST did not finish. From the repo root:"
+    echo "TV_HOST=$TV_HOST tools/tv.py 'pm enable --user 0 $STOCK_LAUNCHER'"
+    echo "TV_HOST=$TV_HOST tools/tv.py 'cmd package set-home-activity --user 0 \$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $STOCK_LAUNCHER | tail -n 1)'"
+    echo "# then check: TV_HOST=$TV_HOST tools/tv.py '$HOME_QUERY'"
+  } > "$REC" 2>/dev/null || REC=""
+  echo "ERROR: recovery is incomplete; Home still resolves to '${BACK:-nothing}'." >&2
+  if [ -n "$REC" ]; then echo "The commands that finish it are in $REC; the TV still needs ADB for them." >&2
+  else echo "Re-run once the TV answers: pm enable --user 0 $STOCK_LAUNCHER, then set its Home activity." >&2; fi
+  return 1
+}
+
 # Order matters: the new launcher is started before the stock one is disabled, and the home
 # preference is set after. Android drops the preference whenever the set of HOME apps changes, and
 # on Google TV 14 the next candidate is the setup wizard's RecoveryActivity, which crash-loops
 # system_server (see examples/xiaomi-tv-a-pro-2026). So check where Home ended up, and put the
 # stock launcher back if it is not ours.
-HOME_NOW=$("$PY" -I ../tools/tv.py 'cmd package resolve-activity --brief -c android.intent.category.HOME -a android.intent.action.MAIN' | tail -n 1 | tr -d '\r')
+HOME_NOW=$(query_home)
 case "$HOME_NOW" in
   com.gathin.tvhome/*) echo "Home now resolves to $HOME_NOW" ;;
   *)
-    [ "$STOCK_LAUNCHER" = none ] || "$PY" -I ../tools/tv.py "pm enable --user 0 $STOCK_LAUNCHER" >/dev/null || true
-    echo "ERROR: Home resolves to ${HOME_NOW:-nothing}, not to the new launcher; $STOCK_LAUNCHER was re-enabled." >&2
-    echo "On Google TV this usually means com.google.android.tungsten.setupwraith also claims Home: add it to" >&2
-    echo "your debloat list (see README, Troubleshooting), apply the list, then run this script again." >&2
+    if [ -z "$HOME_NOW" ]; then
+      echo "ERROR: the TV stopped answering while Home was being switched, so the outcome is unknown." >&2
+    else
+      echo "ERROR: Home resolves to $HOME_NOW, not to the new launcher." >&2
+    fi
+    rollback_home || true
+    if [ -n "$HOME_NOW" ]; then
+      echo "On Google TV this usually means com.google.android.tungsten.setupwraith also claims Home: add it to" >&2
+      echo "your debloat list (see README, Troubleshooting), apply the list, then run this script again." >&2
+    fi
     exit 1 ;;
 esac
 

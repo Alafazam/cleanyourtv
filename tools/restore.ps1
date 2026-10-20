@@ -16,7 +16,12 @@ $py = Join-Path $repo 'tools\venv\Scripts\python.exe'
 if (-not $TvHost) { throw 'pass -TvHost <tv ip> or set $env:TV_HOST' }
 $env:TV_HOST = $TvHost
 
-$pkgs = Get-Content $List | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ }
+$pkgs = Get-Content $List | ForEach-Object { ($_ -replace '#.*$', '').Trim() } | Where-Object { $_ } | ForEach-Object { ($_ -split '\s+')[0] }
+# Same check as disable.ps1: the list is contributor-supplied (#165).
+$bad = @($pkgs | Where-Object { $_ -notmatch '^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$' })
+if ($bad.Count -gt 0) {
+    throw "refusing $List, not a package name: $($bad -join ', ')"
+}
 $cmds = @($pkgs | ForEach-Object { "pm enable $_" }) + @(
     "pm enable $Stock",
     # resolve the stock HOME component on the TV (Android 9 needs pkg/activity, not just pkg)

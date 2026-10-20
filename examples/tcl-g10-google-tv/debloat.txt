@@ -2,6 +2,9 @@
 # Android 12 (Google TV, basic mode), firmware STT2.230203.001, software V8-R75PT01-LF1V499
 # Likely a good starting point for other 2023+ TCL Google TV sets on the Realtek G10 platform.
 #
+# Also confirmed on a TCL 55P6K (Spain retail name for the same G10 platform), product
+# G10_4K_GB_NF_32BIT, identical firmware build STT2.230203.001 — this list applies unchanged.
+#
 # Apply:   TV_HOST=<tv ip> tools/disable.sh examples/tcl-g10-google-tv/debloat.txt
 # Undo:    TV_HOST=<tv ip> tools/restore.sh examples/tcl-g10-google-tv/debloat.txt com.google.android.apps.tv.launcherx
 # Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
@@ -18,6 +21,12 @@
 #   tools/tv.py 'settings put secure screensaver_components com.android.dreams.basic/.Colors'
 # - screencap writes an empty file while Live TV/HDMI is on screen. Press Home first.
 # - The Google TV promo banner is drawn by launcherx itself, so only launcher/ removes it.
+# - Disabling the stock launcher alone is not enough to install a replacement:
+#   com.google.android.tungsten.setupwraith (the setup wizard) also claims Home at a lower
+#   priority and takes over once launcherx is disabled. Disable it too before setting the new
+#   launcher as Home — launcher/build-and-install.sh does this automatically and rolls back if
+#   Home doesn't land on the new launcher. List it in your own debloat file so restore.sh brings
+#   it back. Confirmed on two separate 55P6K units.
 
 # TCL content, ads and promos
 com.tcl.tv.plus                        # TCL TV+ content app

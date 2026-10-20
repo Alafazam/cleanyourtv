@@ -20,4 +20,16 @@
     <string name="cant_open">No se puede abrir %1$s</string>
     <string name="date_format">EEEE d \'de\' MMMM</string>
     <string name="dream_name">Reloj</string>
+    <string name="launcher_settings">Ajustes del lanzador</string>
+    <string name="columns_label">Aplicaciones por fila</string>
+    <string name="animations_state">Animaciones: %1$s</string>
+    <string name="advanced_effects">Efectos avanzados</string>
+    <string name="advanced_effects_state">Efectos avanzados: %1$s</string>
+    <string name="advanced_effects_warning">Eleva las tarjetas, amplía los iconos y suaviza los cambios de color. Puede aumentar el uso de memoria; depende del televisor.</string>
+    <string name="follow_theme">Seguir el tema (restablecer ajustes)</string>
+    <string name="follow_theme_hint">Usa el diseño y los efectos del tema actual o los valores integrados. Aplicar o restablecer un tema también borra estos ajustes.</string>
+    <string name="tv_settings">Ajustes del televisor</string>
+    <string name="on">Sí</string>
+    <string name="off">No</string>
+    <string name="enable">Activar</string>
 </resources>

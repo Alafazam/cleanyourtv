@@ -23,7 +23,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN отключён</string>
     <string name="home_settings">Главный экран по умолчанию</string>
-    <string name="home_settings_help">Выберите главный экран в системных настройках, затем нажмите кнопку «Домой».</string>
+    <string name="home_settings_help">Выберите исходный главный экран, чтобы перестать использовать CleanYourTV по умолчанию, или CleanYourTV, чтобы вернуться. Исходный экран должен быть включён, а телевизор должен поддерживать выбор главного экрана. Если он отключён, сначала запустите скрипт восстановления.</string>
     <string name="input_key_service_description">Открывает список источников при нажатии кнопки выбора источника на пульте.</string>
     <string name="home_key_name">Кнопка «Домой»</string>
     <string name="home_key_description">Кнопка «Домой» на пульте открывает этот главный экран.</string>
@@ -32,7 +32,7 @@
     <string name="card_prompt_names">Карточка: «%1$s». Приложение: «%2$s».</string>
     <string name="card_prompt_resigned">Ключ подписи приложения %1$s изменился. Прежний выбор больше не действует. Выберите заново, показывать ли карточку.</string>
     <string name="card_prompt_relabelled">После вашего выбора приложение %1$s изменило название карточки. Выберите заново, показывать ли её.</string>
-    <string name="card_prompt_hint">Позже это можно изменить: удерживайте OK на кнопке «Настройки».</string>
+    <string name="card_prompt_hint">Позже это можно изменить: удерживайте OK на кнопке «Настройки» и выберите «Карточки приложений».</string>
     <string name="card_prompt_identity">%1$s, ключ %2$s</string>
     <string name="card_keep_hidden">Не показывать</string>
     <string name="card_show">Показать карточку</string>
@@ -46,4 +46,16 @@
     <string name="card_state_new">Новая</string>
     <string name="card_state_new_key">Новый ключ</string>
     <string name="card_state_new_label">Новое название</string>
+    <string name="launcher_settings">Настройки главного экрана</string>
+    <string name="columns_label">Приложений в ряду</string>
+    <string name="animations_state">Анимация: %1$s</string>
+    <string name="advanced_effects">Расширенные эффекты</string>
+    <string name="advanced_effects_state">Расширенные эффекты: %1$s</string>
+    <string name="advanced_effects_warning">Приподнимает плитки, увеличивает значки и сглаживает переходы цвета. Может увеличить расход памяти; результат зависит от телевизора.</string>
+    <string name="follow_theme">Следовать теме (сбросить выбор)</string>
+    <string name="follow_theme_hint">Использовать параметры расположения и анимации текущей темы или встроенные. Установка или сброс темы также удаляет выбор на телевизоре.</string>
+    <string name="tv_settings">Системные настройки ТВ</string>
+    <string name="on">Вкл.</string>
+    <string name="off">Выкл.</string>
+    <string name="enable">Включить</string>
 </resources>

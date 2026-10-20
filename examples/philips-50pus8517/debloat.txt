@@ -45,7 +45,39 @@
 #    after every boot, reproducibly. pm disable-user, pm suspend, per-component disable and
 #    pm hide were all tried; the first is undone, the second does not stop it, the last two are
 #    refused by the platform. Left enabled, at a cost of about 37 MB.
-# 5. The replacement launcher takes over on its own. Projectivy declares
+# 5. A DISABLED PACKAGE CAN LEAVE A PERSISTENT PROCESS RETRYING FOREVER, AND pidof WILL NOT
+#    SHOW IT. org.droidtv.xtv is the persistent TV engine and has five outbound service
+#    bindings. Two of them, eum and aurora, were on the first version of this list, and
+#    BOTH leave xtv in a permanent retry loop when disabled. Neither is in the list above now;
+#    both are in the DO NOT DISABLE block below.
+#
+#    org.droidtv.eum -- bound via CONTEXTUALHELP. About five retries per second, logged as
+#      xtvContextInterface ... connectCotextService - Service failed to connec i is null
+#    51 of them in 10 seconds of an idle TV. This one also BREAKS A VISIBLE FUNCTION, and not
+#    the one you would guess: the Philips sources drawer opens and vanishes within a second,
+#    so HDMI inputs stop being reachable from the remote's SOURCES key. SourcesService logged
+#    a correct, complete source list every time and the drawer still died.
+#
+#    org.droidtv.aurora -- about five retries per second too, logged as
+#      xtvService: xtvService handleConnectAurora
+#    at a steady 201 ms interval, 59 in 30 seconds of an idle TV. This one breaks nothing
+#    visible and costs little: xtv sits at 0.2% of one core while doing it. It is log noise
+#    plus a retry that can never succeed. Re-enabling it is free in practice -- aurora's
+#    process does not start at idle even when the package is enabled, so xtv only needed the
+#    package to be resolvable.
+#
+#    `pm enable` on either took its counter to zero immediately, with no reboot.
+#
+#    THE METHOD, which is the transferable part: a live PID proves the process exists, not
+#    that it is healthy. xtv held the same PID through all eleven batches while both loops
+#    ran. And do not grep for a string you already know -- that is how I missed the second
+#    loop for a day after fixing the first. Clear the log, wait 30 seconds on an idle TV,
+#    then group EVERYTHING by frequency and look at what repeats:
+#      adb shell logcat -c; sleep 30; adb shell logcat -d > idle.txt
+#      # then collapse digits and count: anything repeating several times a second is a loop
+#    On this set that takes an idle log from 130 lines per 30 s down to 50, and the 50 that
+#    remain are the firmware's own heartbeats.
+# 6. The replacement launcher takes over on its own. Projectivy declares
 #    android.intent.category.HOME, so the moment com.google.android.tvlauncher is disabled the
 #    system resolves HOME to it — immediately, without a reboot and without enabling any
 #    accessibility service. Check with
@@ -77,8 +109,6 @@ org.droidtv.android.fitness               # Fitness Buddy
 
 # Philips features this owner does not use. Check each against your own setup.
 org.droidtv.amazonalexa                   # Alexa bridge; live TV holds a binding into it, so test channel zapping and the EPG after disabling -- NOT exercised on this unit
-org.droidtv.eum                           # "How to…" e-manual plus the Check TV / Check picture / Check network / Remote control test wizards; four services, bound by settings, playtv, channels and persistent xtv -- the Help key and the Settings tree were NOT exercised on this unit
-org.droidtv.aurora                        # Philips Aurora ambient artwork screen; also answers the /6/aurora/settings JointSpace endpoints
 org.droidtv.dlna                          # DLNA/UPnP server and renderer; persistent + coreApp, yet disables cleanly and contentexplorer ("Media") still starts and keeps its PID. Its DLNA init is gated behind a broadcast dlna itself sends, so the USB source should be unaffected -- reasoned from the code, not tested here
 org.droidtv.ipcontrol                     # LAN control of volume, audio output, Ambilight on/off and ShopMode. NOTE: this is NOT the JointSpace API on ports 1925/1926 — that is served by org.droidtv.xtv, which must stay. Keep this if you drive the TV from Home Assistant
 org.droidtv.demome                        # "Demo me" retail demo mode, e-sticker and shop loop; bound at boot by org.droidtv.settings to clear demo clips before a firmware update, null-guarded
@@ -146,6 +176,12 @@ com.google.android.youtube.tv
 #   Browser engine             com.vewd.core.browserui plus org.droidtv.nettvbrowser — HbbTV and
 #                              the app gallery run on it
 #   USB media                  org.droidtv.contentexplorer ("Media")
+#   Contextual help            org.droidtv.eum -- see quirk 5. It looks like a pure e-manual
+#                              and it is not: persistent xtv binds its EUMService and retries
+#                              forever without it, which costs you the sources drawer
+#   Ambient screen             org.droidtv.aurora -- see quirk 5. Disabling it leaves xtv
+#                              retrying every 201 ms forever. Nothing visible breaks, but
+#                              re-enabling costs nothing: its process never starts at idle
 #
 # org.droidtv.philipstvdrawer is safe to disable but was kept on purpose: it is the Philips side
 # menu with shortcuts to the TV guide, channel list, sources, Media and quick settings — not ads.

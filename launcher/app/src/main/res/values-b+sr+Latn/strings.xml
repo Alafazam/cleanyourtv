@@ -23,8 +23,20 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN isključen</string>
     <string name="home_settings">Podrazumevani početni ekran</string>
-    <string name="home_settings_help">Izaberite početni ekran u podešavanjima sistema, pa pritisnite Home.</string>
+    <string name="home_settings_help">Izaberite originalni početni ekran da CleanYourTV više ne bude podrazumevan ili izaberite CleanYourTV da se vratite. Originalni pokretač mora biti omogućen, a TV mora podržavati izbor početnog ekrana. Ako je isključen, prvo koristite skriptu za vraćanje.</string>
     <string name="input_key_service_description">Otvara izbor ulaza kada se na daljinskom pritisne dugme Input.</string>
     <string name="home_key_name">Dugme Home</string>
     <string name="home_key_description">Dugme Home na daljinskom otvara ovaj početni ekran.</string>
+    <string name="launcher_settings">Podešavanja početnog ekrana</string>
+    <string name="columns_label">Aplikacija po redu</string>
+    <string name="animations_state">Animacije: %1$s</string>
+    <string name="advanced_effects">Napredni efekti</string>
+    <string name="advanced_effects_state">Napredni efekti: %1$s</string>
+    <string name="advanced_effects_warning">Podiže pločice, uvećava ikone i ublažava prelaze boja. Može povećati potrošnju memorije, zavisno od TV-a.</string>
+    <string name="follow_theme">Prati temu (resetuj izbore)</string>
+    <string name="follow_theme_hint">Koristi raspored i animacije tekuće teme ili ugrađene vrednosti. Primena ili resetovanje teme briše i izbore na TV-u.</string>
+    <string name="tv_settings">Sistemska podešavanja TV-a</string>
+    <string name="on">Uklj.</string>
+    <string name="off">Isklj.</string>
+    <string name="enable">Uključi</string>
 </resources>

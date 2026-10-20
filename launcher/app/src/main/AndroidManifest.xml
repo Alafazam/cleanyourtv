@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -8,8 +9,11 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!-- Needed on Android 10 to read the Wi-Fi network name; granted over adb at install time. -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Needed since Android 10 to read the Wi-Fi network name for the network pill. Never requested at
+         runtime: build-and-install grants it with pm grant, so lint's Android 12 "ask for COARSE with
+         FINE" rule does not apply here. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:ignore="CoarseFineLocation" />
     <!-- Reads the pictures in the wallpaper folder (config.xml, wallpaper_folder); granted over adb at install time. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
@@ -63,6 +67,11 @@
             android:exported="false"
             android:excludeFromRecents="true"
             android:theme="@style/Theme.TvHome.Picker" />
+        <activity
+            android:name=".LauncherSettingsActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".HomeSettingsActivity"
             android:exported="false"

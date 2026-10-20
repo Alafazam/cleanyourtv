@@ -11,11 +11,16 @@
 # Notes from this box:
 # - The stock home is com.google.android.apps.tv.launcherx. launcher/build-and-install.sh disables it.
 # - setupwraith's RecoveryActivity (HOME priority 1, launcherx 2, a sideloaded launcher 0) takes Home once
-#   launcherx is off, so setupwraith has to go too, and it has to go FIRST. Disabled the other way round
-#   (launcherx, then setupwraith) the box lost Wi-Fi, did not rejoin by itself and ADB went offline until Wi-Fi
-#   was reconnected by hand on the TV. Redone in the right order (setupwraith, then launcherx): ADB and Wi-Fi
-#   stayed up and Home went straight to the new launcher. This is the same crash-loop xiaomi-tv-a-pro-2026
+#   launcherx is off, so setupwraith has to go too, and it has to go FIRST. Redone in that order (setupwraith,
+#   then launcherx), Home went straight to the new launcher. This is the same crash-loop xiaomi-tv-a-pro-2026
 #   describes. Re-enable setupwraith to re-pair the remote.
+# - Disabling setupwraith takes the box off Wi-Fi in either order if the network was saved during first setup:
+#   that network belongs to setupwraith, and Android deletes it with the app. The first run here most likely lost
+#   Wi-Fi this way; the redo stayed online because the network had been re-joined by hand in between. Seen on a
+#   second box (V816.0.7.0.UZFAABX): disabling setupwraith alone, launcherx still Home, logged
+#   "WifiConfigManager: Remove all networks for app ... setupwraith" and dropped Wi-Fi and ADB within a second.
+#   The network re-joined in Settings is a new entry owned by android.uid.system and survived disabling
+#   launcherx and dreamx. Check before disabling: tools/tv.py "dumpsys wifi" | grep -o 'cname=[^ ]*'
 # - Leave alone: com.xiaomi.android.tvsetup.partnercustomizer, mitv.service, com.droidlogic*.
 # - With the stock launcher gone, apps without a dock slot just appear in the grid.
 

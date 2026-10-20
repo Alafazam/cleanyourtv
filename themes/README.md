@@ -3,6 +3,8 @@
 A theme is a folder with a `config.json` and, optionally, a `wallpaper.jpg`. Pushing one changes the
 launcher's dock, layout and look on the TV without rebuilding the APK: the launcher reads
 `config.json` as an overlay over its built-in `config.xml` the next time it starts.
+Choices made in Launcher settings take priority until you choose Follow theme. Pushing a theme or
+using `tools/theme.sh --reset` also clears those on-TV column and motion choices.
 
 ```bash
 TV_HOST=192.168.1.50 tools/theme.sh themes/aurora          # push a theme and restart Home
@@ -34,8 +36,11 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `module_cards` | bool | Look for module cards and ask about them (`true`); `false` turns the feature off |
 | `reduced_motion` | bool | Calmer motion for weak GPUs: stiff highlight spring, no tile overshoot, short fades, no entrance replay |
 | `vpn_app` | string | App the network pill opens when a VPN is configured; also shows a red "VPN off" badge while no VPN is up |
-| `show_home_settings_shortcut` | bool | The "Default home" tile, where the TV has a home picker |
+| `animations` | bool | Basic focus, glass, title and tile entrance motion; true by default |
+| `advanced_effects` | bool | Optional lifted tile, icon zoom, smooth ambient colour and app opening effects; false by default |
+| `show_home_settings_shortcut` | bool | Keep the optional Default-home tile visible when the TV has a home picker; false by default |
 | `background_color` | `#RRGGBB` | Colour behind everything; black by default |
+| `sky_intensity` | 0 to 100 | Time-of-day backdrop: a dark gradient that follows the clock, 0 hides it (default) |
 | `wallpaper` | bool | Show `wallpaper.jpg` from the theme folder (`true`), or ignore it (`false`) |
 | `dock_band` | bool | The darker rounded band behind the dock row (`true`); `false` puts the dock tiles straight on the wallpaper |
 | `wallpaper_folder` | string | Folder of pictures that rotate behind the launcher, e.g. `/sdcard/Wallpapers`; empty turns it off. While it has pictures it replaces `wallpaper.jpg`. A Wallpaper tile in the grid opens a pop-up to pick one |
@@ -56,6 +61,19 @@ Android 10 is the known case. The default, `false`, keeps the normal motion.
 
 ```json
 { "reduced_motion": true }
+```
+
+## Time-of-day backdrop
+
+`"sky_intensity": 60` draws a dark gradient over the wallpaper and behind everything else, that follows the
+clock: night blues, a soft blue day, then a warm horizon that peaks just before eight in the evening.
+The glow near the bottom edge travels from left to right with the sun. The colours stay dark so the
+white clock, the hero name and the dock band keep their contrast. It is drawn as one 480×270 bitmap
+and redrawn once a minute, never animated, so even a 1 GB TV has nothing to keep up with. `0` keeps
+the plain background; the default is off (the reference launcher looks exactly as before).
+
+```json
+{ "sky_intensity": 60 }
 ```
 
 ## Adding a theme

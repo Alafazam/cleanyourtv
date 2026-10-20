@@ -81,7 +81,7 @@ class ExampleListsTest(unittest.TestCase):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         n = len(folders())
         self.assertIn(f"{n} TV lists", text, "nav link count is stale")
-        self.assertIn(f"{n} TVs with tested lists", text, "numbers line is stale")
+        self.assertIn(f"{n} TV models", text, "numbers line is stale")
 
 
 if __name__ == "__main__":

@@ -10,12 +10,24 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   `tools/tv.py` avoids the binary entirely.
 - **No "wireless debugging" toggle** on some TVs, Xiaomi among them. USB debugging alone opens
   network ADB on port 5555.
+- **USB debugging is greyed out and there is no Wireless debugging entry either**, seen on a carrier
+  box ([Airtel Xstream, Android 11](https://github.com/Gathin23/cleanyourtv/issues/227)). Some ISP
+  firmware removes both switches, and then no shell can be reached: `tools/tv.py` fails,
+  `adb connect <ip>:5555` times out, and so does a port check. That timeout is the firmware, not
+  Wi-Fi, the router or the cable, so don't go rebuilding the network for it. Greyed-out rather than
+  missing points at a device-owner policy or a provisioning lock; the toggle comes back after a
+  firmware update from the ISP, or not at all. Without one of the two switches this repo has nothing
+  to talk to.
 - **USB debugging never opens port 5555** on some Google TV sets (a Skyworth-built Philips among
   them). Pair once through Wireless debugging with the stock `adb` (`adb pair <ip>:<port> <code>`,
-  then `adb connect`), run `adb tcpip 5555`, and `tools/tv.py` works from then on.
+  then `adb connect`), run `adb tcpip 5555`, and `tools/tv.py` works from then on. `dns-sd -B
+  _adb-tls-pairing._tcp` (or `adb mdns services`) shows the pairing port while the code is on screen.
+  Android switches Wireless debugging off whenever Wi-Fi drops; turn it back on and `adb` reconnects
+  without a new code. Port 5555 from `adb tcpip` usually lasts only until the next reboot.
 - **USB devices go dead while USB debugging is on**, seen on the Xiaomi Mi Box S: its firmware
   switches the USB port to ADB device mode, which cuts the power to a USB speaker or drive. Switch
   USB debugging off when you're done; the launcher doesn't need it.
+- **Close port 5555 when you're done**: plaintext, and a shell for anyone on the LAN when `ro.adb.secure=0`. Steps in the README FAQ.
 - **Windows PowerShell 5.1 adds a byte-order mark** to text piped into a program, which turned the
   first batch command into gibberish. `tv.py` now strips it, and the `.ps1` scripts pipe clean UTF-8.
 - **"Allow USB debugging?" comes back** although `adb devices` already works: `tv.py` used its own
@@ -55,6 +67,15 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   `com.google.android.tungsten.setupwraith` package is what frees the slot. It is the first-run
   setup wizard, so everyday use is unaffected, but re-enable it before a factory reset - list it in
   your `debloat.txt` and `tools/restore.sh` does that for you.
+- **The TV drops off Wi-Fi for good the moment setupwraith is disabled**, seen on Google TV 14 (Sony
+  BRAVIA 9 II, Philips R8G, Skyworth SWTV-24NA-4K NF, Xiaomi TV Box S 3rd gen MiTV-AFMU0). A Wi-Fi network saved during the first-run
+  wizard belongs to setupwraith, and Android deletes an app's saved networks when the app is disabled.
+  The TV is fine but offline, so ADB and the phone remote stop working, and a restart doesn't bring
+  the network back. Check before disabling it: `tools/tv.py "dumpsys wifi" | grep -o 'cname=[^ ]*'`.
+  If it names setupwraith, forget the network and join it again in Settings > Network & Internet (it
+  then belongs to `android.uid.system`), or use Ethernet. `tools/disable.sh` skips setupwraith while it
+  owns the network (`FORCE_SETUPWRAITH=1` overrides). Already offline? Rejoin from the TV with its own
+  remote or a USB keyboard, then turn Wireless debugging back on if it was in use.
 - **The TV drops off Wi-Fi every minute right after the install**, seen on Google TV 14 (Xiaomi
   MiTV-MZTU0): the same setupwraith `.RecoveryActivity` took Home and system_server crash-looped
   on it. The install script now starts the new launcher before disabling the stock one, sets the
