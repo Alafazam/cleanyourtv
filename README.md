@@ -1,3 +1,32 @@
+> **This is a personal fork** of [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv) for one TV, a
+> Xiaomi MiTV-AXSO2 (Android TV 9). Branch `axso2-launcher` adds rotating wallpapers, a Wallpaper picker and an
+> eight-app dock. Everything below the line is the upstream README.
+
+## Before and after on my Xiaomi MiTV-AXSO2
+
+| Before: stock home | After: this launcher |
+|---|---|
+| ![Stock Google TV home with a sponsored Hero ad, a Sponsored by JioHotstar row and PatchWall](docs/axso2-fork/before-stock-home.jpg) | ![The launcher with a mosque photo as wallpaper and an eight-app dock](docs/axso2-fork/home.jpg) |
+| Sponsored banner, sponsored rows, Shop and Discover tabs | No ads or content rows; my eight apps in one row |
+
+| | Before | After |
+|---|---|---|
+| Free RAM | about 550 MB | about 850 MB |
+| Packages disabled (not uninstalled) | 0 | 33 ([list](https://github.com/Alafazam/cleanyourtv/blob/examples-xiaomi-mitv-axso2/examples/xiaomi-mitv-axso2/debloat.txt)) |
+| Home screen | Google's stock launcher and PatchWall | This launcher |
+| Wallpaper | None | 12 photos rotating every 30 minutes, picked from a tile |
+
+| Wallpaper tile | Wallpaper pop-up |
+|---|---|
+| ![The Wallpaper tile at the end of the app grid](docs/axso2-fork/tile.jpg) | ![Twelve thumbnails, the current one marked Now](docs/axso2-fork/picker.jpg) |
+
+How it works, its settings and photo credits: [docs/axso2-fork](docs/axso2-fork/README.md).
+Upstream: listed in [SHOWCASE.md](https://github.com/Gathin23/cleanyourtv/blob/main/SHOWCASE.md)
+([#204](https://github.com/Gathin23/cleanyourtv/pull/204)); TV list in
+[#260](https://github.com/Gathin23/cleanyourtv/pull/260).
+
+---
+
 <p align="center">
   <a href="https://cleanyour.tv"><img src="https://raw.githubusercontent.com/Gathin23/cleanyourtv/main/docs/banner.png" alt="CleanYourTV. Your TV, minus the ads." width="800"></a>
 </p>
