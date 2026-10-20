@@ -2,22 +2,37 @@ package com.gathin.tvhome;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.dreams.DreamService;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
+import java.io.File;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Screensaver: the launcher's thin clock and date on black, over a slow ambient glow.
  * Every minute the clock drifts to a new spot and the glow shifts colour, so nothing burns in.
- * No network, no images: cheap enough for a 1 GB TV.
+ * With dream_photos on and pictures in the wallpaper folder, those pictures fill the screen behind the
+ * clock instead of the glow, one at a time, starting with the one after the current wallpaper. Pictures
+ * decode off the main thread at screen size, and only one is held at a time. No network.
  */
 public class ClockDream extends DreamService {
 
+    private static final String TAG = "TvHome.ClockDream";
     private static final long MOVE_MS = 60_000L;
+    private static final long PHOTO_FADE_OUT_MS = 700L;
+    private static final long PHOTO_FADE_IN_MS = 1500L;
     /** Deep, low-brightness glow colours; the glow is drawn at partial alpha on black. */
     private static final int[] PALETTE = {0xFF2B5CFF, 0xFF00A39A, 0xFF8A3FFC, 0xFFE0661B, 0xFFD6336C};
 
@@ -28,11 +43,25 @@ public class ClockDream extends DreamService {
     private int colorIndex;
     private int glowColor;
 
+    /** Photo mode: set in onAttachedToWindow when the folder has pictures, else everything below stays null. */
+    private ImageView photo;
+    private File folder;
+    private List<WallpaperRotation.Picture> pictures;
+    private String shownPhoto;
+    private int photoMinutes;
+    private int minutesOnPhoto;
+    private ExecutorService decoder;
+
     private final Runnable tick = new Runnable() {
         @Override
         public void run() {
             moveClock();
-            shiftGlow();
+            if (photo != null) {
+                minutesOnPhoto++;
+                if (minutesOnPhoto >= photoMinutes) showNextPhoto();
+            } else {
+                shiftGlow();
+            }
             handler.postDelayed(this, MOVE_MS);
         }
     };
@@ -54,6 +83,21 @@ public class ClockDream extends DreamService {
                 glow.setGradientRadius((r - l) * 0.55f));
         colorIndex = random.nextInt(PALETTE.length);
         setGlow(PALETTE[colorIndex]);
+
+        Config cfg = Config.load(this);
+        List<WallpaperRotation.Picture> listed = cfg.dreamPhotos ? WallpaperFolder.list(cfg.wallpaperFolder) : null;
+        if (listed != null && !listed.isEmpty()) {
+            folder = cfg.wallpaperFolder;
+            pictures = listed;
+            photoMinutes = cfg.dreamPhotoMinutes;
+            shownPhoto = WallpaperFolder.load(this).current;   // start after the current wallpaper
+            decoder = Executors.newSingleThreadExecutor();
+            photo = findViewById(R.id.dreamPhoto);
+            photo.setVisibility(View.VISIBLE);
+            findViewById(R.id.dreamVeil).setVisibility(View.VISIBLE);
+            ambient.setVisibility(View.GONE);
+            Log.i(TAG, "photo mode: " + pictures.size() + " pictures, " + photoMinutes + " min each");
+        }
     }
 
     @Override
@@ -64,6 +108,7 @@ public class ClockDream extends DreamService {
             placeClock();
             content.animate().alpha(1f).setDuration(1200).start();
         });
+        if (photo != null) showNextPhoto();
         handler.postDelayed(tick, MOVE_MS);
     }
 
@@ -76,7 +121,40 @@ public class ClockDream extends DreamService {
     @Override
     public void onDetachedFromWindow() {
         handler.removeCallbacks(tick);
+        if (decoder != null) decoder.shutdownNow();
+        if (photo != null) releasePhoto(photo.getDrawable());
         super.onDetachedFromWindow();
+    }
+
+    /** Decodes the next picture by name on the decoder thread, then fades it in over the current one. */
+    private void showNextPhoto() {
+        minutesOnPhoto = 0;
+        String name = WallpaperRotation.next(pictures, shownPhoto);
+        if (name == null) return;
+        shownPhoto = name;
+        File file = new File(folder, name);
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        decoder.execute(() -> {
+            Bitmap bmp = WallpaperFolder.decode(file, dm.widthPixels, dm.heightPixels);
+            if (bmp != null) handler.post(() -> fadeTo(bmp));
+        });
+    }
+
+    private void fadeTo(Bitmap bmp) {
+        if (photo == null || decoder.isShutdown()) {
+            bmp.recycle();
+            return;
+        }
+        photo.animate().alpha(0f).setDuration(photo.getDrawable() == null ? 0 : PHOTO_FADE_OUT_MS).withEndAction(() -> {
+            Drawable old = photo.getDrawable();
+            photo.setImageBitmap(bmp);
+            releasePhoto(old);
+            photo.animate().alpha(1f).setDuration(PHOTO_FADE_IN_MS).start();
+        }).start();
+    }
+
+    private static void releasePhoto(Drawable d) {
+        if (d instanceof BitmapDrawable) ((BitmapDrawable) d).getBitmap().recycle();
     }
 
     private void moveClock() {

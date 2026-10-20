@@ -2,7 +2,6 @@ package com.gathin.tvhome;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -91,24 +90,6 @@ public class WallpaperPickerActivity extends Activity {
         finish();
     }
 
-    /** Decodes a picture at thumbnail size; null when it cannot be read. Runs on the decoder thread. */
-    private static Bitmap decodeThumb(File file) {
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(file.getPath(), opts);
-        int sample = 1;
-        while (opts.outWidth / (sample * 2) >= THUMB_WIDTH_PX) sample *= 2;
-        opts.inJustDecodeBounds = false;
-        opts.inSampleSize = sample;
-        opts.inPreferredConfig = Bitmap.Config.RGB_565;
-        try {
-            return BitmapFactory.decodeFile(file.getPath(), opts);
-        } catch (OutOfMemoryError e) {
-            Log.w(TAG, "no memory for thumbnail " + file, e);
-            return null;
-        }
-    }
-
     private final class ThumbAdapter extends RecyclerView.Adapter<ThumbAdapter.Holder> {
         private final String current;
 
@@ -142,7 +123,7 @@ public class WallpaperPickerActivity extends Activity {
             h.itemView.setOnClickListener(v -> pick(name));
             File file = new File(folder, name);
             decoder.execute(() -> {
-                Bitmap bmp = decodeThumb(file);
+                Bitmap bmp = WallpaperFolder.decode(file, THUMB_WIDTH_PX, 0);
                 // The view may have been rebound to another picture while this one decoded.
                 main.post(() -> {
                     if (bmp != null && name.equals(h.thumb.getTag())) h.thumb.setImageBitmap(bmp);

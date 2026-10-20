@@ -72,7 +72,7 @@ final class WallpaperRotation {
             return new State(state.current, nowMs, newestSeen);
         }
         if (intervalMs > 0 && elapsed >= intervalMs) {
-            return new State(byName.get((index + 1) % byName.size()).name, nowMs, newestSeen);
+            return new State(next(byName, state.current), nowMs, newestSeen);
         }
         return new State(state.current, state.shownAtMs, newestSeen);
     }
@@ -87,6 +87,18 @@ final class WallpaperRotation {
         long newestSeen = state.newestSeenMs;
         for (Picture p : pictures) newestSeen = Math.max(newestSeen, p.modifiedMs);
         return new State(name, nowMs, newestSeen);
+    }
+
+    /**
+     * The picture after {@code after} by name, wrapping round; the first one when {@code after} is null or
+     * gone; null when there are no pictures. The screensaver walks the folder with it.
+     */
+    static String next(List<Picture> pictures, String after) {
+        if (pictures.isEmpty()) return null;
+        List<Picture> byName = new ArrayList<>(pictures);
+        Collections.sort(byName, Comparator.comparing(p -> p.name));
+        int index = indexOf(byName, after);
+        return byName.get(index < 0 ? 0 : (index + 1) % byName.size()).name;
     }
 
     private static int indexOf(List<Picture> pictures, String name) {

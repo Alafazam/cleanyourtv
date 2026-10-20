@@ -45,6 +45,8 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `dock_band` | bool | The darker rounded band behind the dock row (`true`); `false` puts the dock tiles straight on the wallpaper |
 | `wallpaper_folder` | string | Folder of pictures that rotate behind the launcher, e.g. `/sdcard/Wallpapers`; empty turns it off. While it has pictures it replaces `wallpaper.jpg`. A Wallpaper tile in the grid opens a pop-up to pick one |
 | `wallpaper_rotate_minutes` | 0 to 1440 | Minutes between changes while Home is open; `0` never rotates. A newly added picture always shows at once |
+| `dream_photos` | bool | The Clock screensaver shows the pictures from `wallpaper_folder` behind the clock (`true`), or the plain clock over the glow (`false`) |
+| `dream_photo_minutes` | 1 to 60 | Minutes each picture stays in the Clock screensaver |
 
 ## Wallpapers
 

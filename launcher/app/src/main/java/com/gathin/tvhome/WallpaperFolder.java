@@ -2,6 +2,8 @@ package com.gathin.tvhome;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.File;
@@ -52,6 +54,30 @@ final class WallpaperFolder {
                 .putLong(KEY_SHOWN_AT, state.shownAtMs)
                 .putLong(KEY_NEWEST_SEEN, state.newestSeenMs)
                 .apply();
+    }
+
+    /**
+     * Decodes a picture in RGB_565 (no alpha, half the memory), halving its size while both sides stay at or
+     * above {@code minWidth} x {@code minHeight}; pass 0 for a side that does not matter. Null when the file
+     * cannot be decoded or there is not enough memory: a bad picture never takes the caller down.
+     */
+    static Bitmap decode(File file, int minWidth, int minHeight) {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getPath(), opts);
+        int sample = 1;
+        while (opts.outWidth / (sample * 2) >= minWidth && opts.outHeight / (sample * 2) >= minHeight) sample *= 2;
+        opts.inJustDecodeBounds = false;
+        opts.inSampleSize = sample;
+        opts.inPreferredConfig = Bitmap.Config.RGB_565;
+        try {
+            Bitmap bmp = BitmapFactory.decodeFile(file.getPath(), opts);
+            if (bmp == null) Log.w(TAG, "cannot decode " + file);
+            return bmp;
+        } catch (OutOfMemoryError e) {
+            Log.w(TAG, "no memory to decode " + file, e);
+            return null;
+        }
     }
 
     private static boolean isPicture(String name) {

@@ -105,4 +105,11 @@
     <string name="wallpaper_folder" translatable="false">/sdcard/Wallpapers</string>
     <!-- Minutes between wallpaper changes while Home is open; 0 never rotates (a new picture still shows). -->
     <integer name="wallpaper_rotate_minutes">30</integer>
+
+    <!-- Clock screensaver: show the pictures from wallpaper_folder behind the clock, starting with the one after
+         the current wallpaper, under a dark veil so the clock stays readable. false, or an empty folder: the
+         plain clock over the ambient glow. Also "dream_photos" in a theme's config.json. -->
+    <bool name="dream_photos">true</bool>
+    <!-- Minutes each picture stays in the Clock screensaver (1 to 60); the clock moves every minute regardless. -->
+    <integer name="dream_photo_minutes">2</integer>
 </resources>

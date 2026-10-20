@@ -418,19 +418,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private boolean showWallpaper(File file) {
         try {
             android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-            android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
-            android.graphics.BitmapFactory.decodeFile(file.getPath(), opts);
-            int sample = 1;
-            while (opts.outWidth / (sample * 2) >= dm.widthPixels && opts.outHeight / (sample * 2) >= dm.heightPixels) sample *= 2;
-            opts.inJustDecodeBounds = false;
-            opts.inSampleSize = sample;
-            opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;   // no alpha needed, half the memory
-            android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeFile(file.getPath(), opts);
-            if (bmp == null) {
-                Log.w(TAG, "cannot decode wallpaper " + file);
-                return false;
-            }
+            android.graphics.Bitmap bmp = WallpaperFolder.decode(file, dm.widthPixels, dm.heightPixels);
+            if (bmp == null) return false;
             if (wallpaperView == null) {
                 wallpaperView = new ImageView(this);
                 wallpaperView.setScaleType(ImageView.ScaleType.CENTER_CROP);

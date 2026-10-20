@@ -33,6 +33,8 @@ final class Config {
     static final String WALLPAPER_NAME = "wallpaper.jpg";
     /** Longest wallpaper rotation a theme may set: one day. */
     static final int MAX_ROTATE_MINUTES = 24 * 60;
+    /** Longest a theme may keep one picture in the Clock screensaver: one hour. */
+    static final int MAX_DREAM_PHOTO_MINUTES = 60;
     static final String SETTINGS_NAME = "launcher_settings";
     private static final String THEME_REVISION_NAME = "theme_revision";
     private static final String THEME_SIGNATURE_KEY = "theme_signature";
@@ -66,6 +68,10 @@ final class Config {
     final File wallpaperFolder;
     /** Minutes between wallpaper changes from {@link #wallpaperFolder}; 0 never rotates. */
     final int wallpaperRotateMinutes;
+    /** The Clock screensaver shows the pictures from {@link #wallpaperFolder} behind the clock. */
+    final boolean dreamPhotos;
+    /** Minutes each picture stays in the Clock screensaver. */
+    final int dreamPhotoMinutes;
     /** Whether the overlay file was present and parsed. */
     final boolean overlayApplied;
 
@@ -74,7 +80,8 @@ final class Config {
                    int columns, int rowsBelowDock, boolean animations, boolean advancedEffects,
                    boolean shamsiDate, boolean moduleCards, boolean reducedMotion, boolean dockBand, String vpnApp,
                    boolean showHomeSettingsShortcut, int backgroundColor, int skyIntensity,
-                   File wallpaper, File wallpaperFolder, int wallpaperRotateMinutes, boolean overlayApplied) {
+                   File wallpaper, File wallpaperFolder, int wallpaperRotateMinutes,
+                   boolean dreamPhotos, int dreamPhotoMinutes, boolean overlayApplied) {
         this.dockApps = Collections.unmodifiableList(dockApps);
         this.hiddenApps = Collections.unmodifiableList(hiddenApps);
         this.liveTvPackage = liveTvPackage;
@@ -97,6 +104,8 @@ final class Config {
         this.wallpaper = wallpaper;
         this.wallpaperFolder = wallpaperFolder;
         this.wallpaperRotateMinutes = wallpaperRotateMinutes;
+        this.dreamPhotos = dreamPhotos;
+        this.dreamPhotoMinutes = dreamPhotoMinutes;
         this.overlayApplied = overlayApplied;
     }
 
@@ -126,6 +135,8 @@ final class Config {
         boolean homeSettings = res.getBoolean(R.bool.show_home_settings_shortcut);
         String wallpaperFolder = res.getString(R.string.wallpaper_folder).trim();
         int rotateMinutes = res.getInteger(R.integer.wallpaper_rotate_minutes);
+        boolean dreamPhotos = res.getBoolean(R.bool.dream_photos);
+        int dreamPhotoMinutes = res.getInteger(R.integer.dream_photo_minutes);
         int background = 0xFF000000;
         int skyIntensity = res.getInteger(R.integer.sky_intensity);
         boolean applied = false;
@@ -155,6 +166,8 @@ final class Config {
             background = color(json, "background_color", background);
             wallpaperFolder = string(json, "wallpaper_folder", wallpaperFolder);
             rotateMinutes = integer(json, "wallpaper_rotate_minutes", rotateMinutes, 0, MAX_ROTATE_MINUTES);
+            dreamPhotos = bool(json, "dream_photos", dreamPhotos);
+            dreamPhotoMinutes = integer(json, "dream_photo_minutes", dreamPhotoMinutes, 1, MAX_DREAM_PHOTO_MINUTES);
             skyIntensity = integer(json, "sky_intensity", skyIntensity, 0, 100);
         }
         // A theme push or reset invalidates choices made on the TV. On first use, remember the
@@ -174,7 +187,8 @@ final class Config {
                 Math.max(1, columns), Math.max(0, rowsBelow), animations, advancedEffects,
                 shamsi, moduleCards, reducedMotion, dockBand, vpn, homeSettings, background,
                 Math.max(0, Math.min(100, skyIntensity)), wallpaper,
-                wallpaperFolder.isEmpty() ? null : new File(wallpaperFolder), Math.max(0, rotateMinutes), applied);
+                wallpaperFolder.isEmpty() ? null : new File(wallpaperFolder), Math.max(0, rotateMinutes),
+                dreamPhotos, Math.max(1, dreamPhotoMinutes), applied);
     }
 
     private static void syncThemeChoices(SharedPreferences choices, File dir, File config) {

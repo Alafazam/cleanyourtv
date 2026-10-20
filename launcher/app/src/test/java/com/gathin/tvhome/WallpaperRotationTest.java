@@ -115,6 +115,28 @@ public class WallpaperRotationTest {
     }
 
     @Test
+    public void nextGivesThePictureAfterByName() {
+        assertEquals("b.jpg", WallpaperRotation.next(THREE, "a.jpg"));
+        assertEquals("c.jpg", WallpaperRotation.next(THREE, "b.jpg"));
+    }
+
+    @Test
+    public void nextWrapsFromTheLastPictureToTheFirst() {
+        assertEquals("a.jpg", WallpaperRotation.next(THREE, "c.jpg"));
+    }
+
+    @Test
+    public void nextStartsAtTheFirstWhenNothingOrAMissingPictureIsGiven() {
+        assertEquals("a.jpg", WallpaperRotation.next(THREE, null));
+        assertEquals("a.jpg", WallpaperRotation.next(THREE, "gone.jpg"));
+    }
+
+    @Test
+    public void nextOnAnEmptyFolderIsNull() {
+        assertNull(WallpaperRotation.next(Collections.emptyList(), "a.jpg"));
+    }
+
+    @Test
     public void selectShowsThePickedPictureAndRestartsTheInterval() {
         WallpaperRotation.State shown = new WallpaperRotation.State("a.jpg", T0, 300);
         WallpaperRotation.State s = WallpaperRotation.select(THREE, shown, T0 + 5 * MINUTE, "b.jpg");
