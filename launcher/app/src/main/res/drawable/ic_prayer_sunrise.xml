@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sunrise: half sun over the horizon, arrow up. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="34dp" android:height="34dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M2,18h20v2H2z M12,10.5a6,6 0 0 1 6,6H6a6,6 0 0 1 6,-6z M12,1.5l3.2,3.2h-2.2v3.3h-2V4.7H8.8z" />
+</vector>

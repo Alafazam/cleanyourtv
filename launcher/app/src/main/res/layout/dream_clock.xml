@@ -40,6 +40,7 @@
             android:baselineAligned="true">
 
             <TextClock
+                android:id="@+id/dreamClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:format12Hour="h:mm"
@@ -64,6 +65,7 @@
         </LinearLayout>
 
         <TextClock
+            android:id="@+id/dreamDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
@@ -75,5 +77,13 @@
             android:fontFamily="@font/outfit_regular"
             android:letterSpacing="0.14"
             android:textAllCaps="true" />
+
+        <!-- Today's prayer times under the clock (config.xml dream_prayer); drifts with it. -->
+        <include
+            layout="@layout/prayer_panel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:visibility="gone" />
     </LinearLayout>
 </FrameLayout>

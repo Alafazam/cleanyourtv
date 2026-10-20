@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The prayer view: place, next prayer with a countdown, date and Hijri date, six cards and the method.
+     Used full screen (PrayerTimesActivity) and in the Clock screensaver. PrayerUi fills it in. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/prayerPanel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/prayerCity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#B3FFFFFF"
+        android:textSize="13sp"
+        android:fontFamily="@font/outfit_medium"
+        android:letterSpacing="0.22"
+        android:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/prayerHeadline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="40sp"
+        android:fontFamily="@font/outfit_light" />
+
+    <TextView
+        android:id="@+id/prayerDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="18dp"
+        android:textColor="#B3FFFFFF"
+        android:textSize="15sp"
+        android:fontFamily="@font/outfit_regular" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <include android:id="@+id/prayerCard0" layout="@layout/item_prayer_card" />
+        <include android:id="@+id/prayerCard1" layout="@layout/item_prayer_card" />
+        <include android:id="@+id/prayerCard2" layout="@layout/item_prayer_card" />
+        <include android:id="@+id/prayerCard3" layout="@layout/item_prayer_card" />
+        <include android:id="@+id/prayerCard4" layout="@layout/item_prayer_card" />
+        <include android:id="@+id/prayerCard5" layout="@layout/item_prayer_card" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/prayerMethod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="@font/outfit_regular" />
+</LinearLayout>

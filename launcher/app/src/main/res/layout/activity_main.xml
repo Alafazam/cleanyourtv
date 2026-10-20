@@ -152,6 +152,7 @@
                             android:textAllCaps="true" />
                     </LinearLayout>
                 </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -187,6 +188,26 @@
                     android:drawableStart="@drawable/ic_settings"
                     android:nextFocusDown="@+id/grid" />
             </LinearLayout>
+            <!-- Current and next prayer with a countdown (config.xml prayer_times), in a frosted glass pill under
+                 the clock and the buttons, so it never pushes the buttons down or gets cut off. -->
+            <TextView
+                android:id="@+id/prayerLine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/leftBlock"
+                android:layout_marginTop="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:background="@drawable/prayer_pill_bg"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textColor="#FFFFE8B8"
+                android:textSize="16sp"
+                android:fontFamily="@font/outfit_regular"
+                android:letterSpacing="0.02"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <!-- The wrapper clips at the grid's edge; the grid itself must not clip so scaled tiles can overflow their cells. -->

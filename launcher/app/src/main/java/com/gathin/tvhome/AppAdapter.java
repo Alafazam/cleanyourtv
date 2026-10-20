@@ -54,7 +54,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     }
 
     static final class Entry {
-        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, WALLPAPER = 3;
+        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, WALLPAPER = 3, PRAYER = 4;
 
         final int kind;
         final String label;
@@ -122,6 +122,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     private final boolean reducedMotion;
     /** Shows the Wallpaper tile, which opens the picker, when a wallpaper folder is set. */
     private final boolean showWallpaperTile;
+    /** Shows the Prayer Times tile when prayer times are on. */
+    private final boolean showPrayerTile;
     private final List<Entry> items = new ArrayList<>();
 
     AppAdapter(Context ctx, TileListener listener, int dockSize, Config cfg) {
@@ -135,6 +137,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
         this.reducedMotion = cfg.reducedMotion;
         this.showWallpaperTile = cfg.wallpaperFolder != null;
+        this.showPrayerTile = cfg.prayerTimes;
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
         // its view being rebound to whatever app now sits in that slot.
         setHasStableIds(true);
@@ -186,6 +189,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             fresh.add(new Entry(Entry.HOME_SETTINGS, ctx.getString(R.string.home_settings),
                     new ComponentName(ctx, HomeSettingsActivity.class), null,
                     ctx.getDrawable(R.drawable.ic_home_settings), null, 0));
+        }
+        // Prayer Times tile near the end of the grid: today's six times, full screen.
+        if (showPrayerTile) {
+            fresh.add(new Entry(Entry.PRAYER, ctx.getString(R.string.prayer_times_title),
+                    new ComponentName(ctx, PrayerTimesActivity.class), null,
+                    ctx.getDrawable(R.drawable.ic_prayer_isha), null, 0));
         }
         // Wallpaper tile at the end of the grid: opens the picker for the wallpaper folder.
         if (showWallpaperTile) {
@@ -281,6 +290,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         }
         if (e.kind == Entry.WALLPAPER) {
             ctx.startActivity(new Intent(ctx, WallpaperPickerActivity.class));
+            return;
+        }
+        if (e.kind == Entry.PRAYER) {
+            ctx.startActivity(new Intent(ctx, PrayerTimesActivity.class));
             return;
         }
         Intent i = new Intent(Intent.ACTION_MAIN)

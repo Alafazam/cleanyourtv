@@ -9,10 +9,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.dreams.DreamService;
+import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.List;
@@ -33,6 +36,8 @@ public class ClockDream extends DreamService {
     private static final long MOVE_MS = 60_000L;
     private static final long PHOTO_FADE_OUT_MS = 700L;
     private static final long PHOTO_FADE_IN_MS = 1500L;
+    /** The clock is drawn smaller under the prayer view, so the clock, date and six cards fit on screen together. */
+    private static final float CLOCK_SP_WITH_PRAYER = 76f;
     /** Deep, low-brightness glow colours; the glow is drawn at partial alpha on black. */
     private static final int[] PALETTE = {0xFF2B5CFF, 0xFF00A39A, 0xFF8A3FFC, 0xFFE0661B, 0xFFD6336C};
 
@@ -52,9 +57,14 @@ public class ClockDream extends DreamService {
     private int minutesOnPhoto;
     private ExecutorService decoder;
 
+    /** Prayer view under the clock: set in onAttachedToWindow when dream_prayer is on, else null. */
+    private View prayerPanel;
+    private Config prayerConfig;
+
     private final Runnable tick = new Runnable() {
         @Override
         public void run() {
+            bindPrayer();
             moveClock();
             if (photo != null) {
                 minutesOnPhoto++;
@@ -85,6 +95,14 @@ public class ClockDream extends DreamService {
         setGlow(PALETTE[colorIndex]);
 
         Config cfg = Config.load(this);
+        if (cfg.dreamPrayer) {
+            prayerConfig = cfg;
+            prayerPanel = findViewById(R.id.prayerPanel);
+            prayerPanel.setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.dreamClock)).setTextSize(TypedValue.COMPLEX_UNIT_SP, CLOCK_SP_WITH_PRAYER);
+            findViewById(R.id.dreamDate).setVisibility(View.GONE);   // the prayer view shows the date and Hijri date
+            bindPrayer();
+        }
         List<WallpaperRotation.Picture> listed = cfg.dreamPhotos ? WallpaperFolder.list(cfg.wallpaperFolder) : null;
         if (listed != null && !listed.isEmpty()) {
             folder = cfg.wallpaperFolder;
@@ -124,6 +142,12 @@ public class ClockDream extends DreamService {
         if (decoder != null) decoder.shutdownNow();
         if (photo != null) releasePhoto(photo.getDrawable());
         super.onDetachedFromWindow();
+    }
+
+    private void bindPrayer() {
+        if (prayerPanel == null) return;
+        PrayerUi.Day day = PrayerUi.today(prayerConfig);
+        if (day != null) PrayerUi.bindPanel(prayerPanel, day, DateFormat.is24HourFormat(this));
     }
 
     /** Decodes the next picture by name on the decoder thread, then fades it in over the current one. */

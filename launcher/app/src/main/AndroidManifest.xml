@@ -61,6 +61,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Prayer Times, opened only from the launcher's own Prayer Times tile. -->
+        <activity
+            android:name=".PrayerTimesActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.TvHome" />
         <!-- The Wallpaper pop-up, opened only from the launcher's own Wallpaper tile. -->
         <activity
             android:name=".WallpaperPickerActivity"

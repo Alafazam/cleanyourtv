@@ -72,6 +72,12 @@ final class Config {
     final boolean dreamPhotos;
     /** Minutes each picture stays in the Clock screensaver. */
     final int dreamPhotoMinutes;
+    /** Prayer times on Home, the Prayer Times tile and (with {@link #dreamPrayer}) the screensaver. */
+    final boolean prayerTimes;
+    /** Where and how prayer times are calculated; null when {@link #prayerTimes} is off or the place is invalid. */
+    final PrayerTimes.Place prayerPlace;
+    final int hijriOffsetDays;
+    final boolean dreamPrayer;
     /** Whether the overlay file was present and parsed. */
     final boolean overlayApplied;
 
@@ -81,7 +87,8 @@ final class Config {
                    boolean shamsiDate, boolean moduleCards, boolean reducedMotion, boolean dockBand, String vpnApp,
                    boolean showHomeSettingsShortcut, int backgroundColor, int skyIntensity,
                    File wallpaper, File wallpaperFolder, int wallpaperRotateMinutes,
-                   boolean dreamPhotos, int dreamPhotoMinutes, boolean overlayApplied) {
+                   boolean dreamPhotos, int dreamPhotoMinutes, PrayerTimes.Place prayerPlace, int hijriOffsetDays,
+                   boolean dreamPrayer, boolean overlayApplied) {
         this.dockApps = Collections.unmodifiableList(dockApps);
         this.hiddenApps = Collections.unmodifiableList(hiddenApps);
         this.liveTvPackage = liveTvPackage;
@@ -106,6 +113,10 @@ final class Config {
         this.wallpaperRotateMinutes = wallpaperRotateMinutes;
         this.dreamPhotos = dreamPhotos;
         this.dreamPhotoMinutes = dreamPhotoMinutes;
+        this.prayerPlace = prayerPlace;
+        this.prayerTimes = prayerPlace != null;
+        this.hijriOffsetDays = hijriOffsetDays;
+        this.dreamPrayer = dreamPrayer && prayerPlace != null;
         this.overlayApplied = overlayApplied;
     }
 
@@ -137,6 +148,16 @@ final class Config {
         int rotateMinutes = res.getInteger(R.integer.wallpaper_rotate_minutes);
         boolean dreamPhotos = res.getBoolean(R.bool.dream_photos);
         int dreamPhotoMinutes = res.getInteger(R.integer.dream_photo_minutes);
+        boolean prayer = res.getBoolean(R.bool.prayer_times);
+        String prayerCity = res.getString(R.string.prayer_city).trim();
+        String prayerLat = res.getString(R.string.prayer_latitude).trim();
+        String prayerLon = res.getString(R.string.prayer_longitude).trim();
+        String prayerZone = res.getString(R.string.prayer_timezone).trim();
+        int fajrAngle = res.getInteger(R.integer.prayer_fajr_angle);
+        int ishaAngle = res.getInteger(R.integer.prayer_isha_angle);
+        int asrFactor = res.getInteger(R.integer.prayer_asr_factor);
+        int hijriOffset = res.getInteger(R.integer.hijri_offset_days);
+        boolean dreamPrayer = res.getBoolean(R.bool.dream_prayer);
         int background = 0xFF000000;
         int skyIntensity = res.getInteger(R.integer.sky_intensity);
         boolean applied = false;
@@ -168,6 +189,16 @@ final class Config {
             rotateMinutes = integer(json, "wallpaper_rotate_minutes", rotateMinutes, 0, MAX_ROTATE_MINUTES);
             dreamPhotos = bool(json, "dream_photos", dreamPhotos);
             dreamPhotoMinutes = integer(json, "dream_photo_minutes", dreamPhotoMinutes, 1, MAX_DREAM_PHOTO_MINUTES);
+            prayer = bool(json, "prayer_times", prayer);
+            prayerCity = string(json, "prayer_city", prayerCity);
+            prayerLat = string(json, "prayer_latitude", prayerLat);
+            prayerLon = string(json, "prayer_longitude", prayerLon);
+            prayerZone = string(json, "prayer_timezone", prayerZone);
+            fajrAngle = integer(json, "prayer_fajr_angle", fajrAngle, 10, 25);
+            ishaAngle = integer(json, "prayer_isha_angle", ishaAngle, 10, 25);
+            asrFactor = integer(json, "prayer_asr_factor", asrFactor, 1, 2);
+            hijriOffset = integer(json, "hijri_offset_days", hijriOffset, -3, 3);
+            dreamPrayer = bool(json, "dream_prayer", dreamPrayer);
             skyIntensity = integer(json, "sky_intensity", skyIntensity, 0, 100);
         }
         // A theme push or reset invalidates choices made on the TV. On first use, remember the
@@ -188,7 +219,9 @@ final class Config {
                 shamsi, moduleCards, reducedMotion, dockBand, vpn, homeSettings, background,
                 Math.max(0, Math.min(100, skyIntensity)), wallpaper,
                 wallpaperFolder.isEmpty() ? null : new File(wallpaperFolder), Math.max(0, rotateMinutes),
-                dreamPhotos, Math.max(1, dreamPhotoMinutes), applied);
+                dreamPhotos, Math.max(1, dreamPhotoMinutes),
+                prayer ? PrayerTimes.Place.parse(prayerCity, prayerLat, prayerLon, prayerZone, fajrAngle, ishaAngle, asrFactor) : null,
+                hijriOffset, dreamPrayer, applied);
     }
 
     private static void syncThemeChoices(SharedPreferences choices, File dir, File config) {

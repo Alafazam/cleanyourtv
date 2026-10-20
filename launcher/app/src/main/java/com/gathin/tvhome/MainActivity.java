@@ -144,6 +144,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private ImageView wallpaperView;
     /** Path of the picture in wallpaperView, so an unchanged choice is not decoded again. */
     private String shownWallpaperPath;
+    /** Settings for the prayer line under the clock; its place is null when prayer times are off. */
+    private Config prayerConfig;
+    private TextView prayerLine;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     /** Refreshes the network pill when the connection changes: at boot Wi-Fi often connects after Home is shown. */
@@ -196,6 +199,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         @Override
         public void run() {
             updateGreeting();
+            updatePrayerLine();
             updateWifiLabel();
             updateWallpaper();
             sky.update();
@@ -223,6 +227,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         root = findViewById(R.id.root);
         root.setBackgroundColor(cfg.backgroundColor);
         themeWallpaper = cfg.wallpaper;
+        prayerConfig = cfg;
+        prayerLine = findViewById(R.id.prayerLine);
+        prayerLine.setVisibility(cfg.prayerTimes ? View.VISIBLE : View.GONE);
         wallpaperFolder = cfg.wallpaperFolder;
         wallpaperRotateMs = cfg.wallpaperRotateMinutes * MINUTE_MS;
         updateWallpaper();
@@ -473,6 +480,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         rebuildOnResume = false;
         updateGreeting();
+        updatePrayerLine();
         updateWifiLabel();
         updateInputsButton();
         updateWallpaper();
@@ -851,6 +859,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     // ---- top bar ---------------------------------------------------------------------------------
+
+    /** "Now Dhuhr 12:04 PM · Next Asr 4:21 PM, in 1 h 10 min" under the clock. */
+    private void updatePrayerLine() {
+        PrayerUi.Day day = PrayerUi.today(prayerConfig);
+        if (day != null) prayerLine.setText(PrayerTimes.homeLine(day.status, android.text.format.DateFormat.is24HourFormat(this)));
+    }
 
     private void updateGreeting() {
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);

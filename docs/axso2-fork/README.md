@@ -23,7 +23,12 @@ This branch is the reference launcher (v2.3) with two changes for one TV, a Xiao
    empty folder or `dream_photos` false it is the plain clock over the glow. Pick "Clock" under Settings →
    Device Preferences → Screen saver, or
    `adb shell settings put secure screensaver_components com.gathin.tvhome/.ClockDream`.
-4. **Personal config.** An eight-app dock (Netflix, Prime Video, YouTube, JioHotstar, JioCinema, Spotify,
+4. **Prayer times, calculated on the TV.** No network: the sun-position method used by most timetables, set to
+   Bengaluru, Karachi method (Fajr and Isha 18°) and Hanafi Asr, checked against published Bengaluru times to
+   within a minute (`PrayerTimesTest`). Home shows the current and next prayer with a countdown in a glass pill;
+   a Prayer Times tile opens the full day (six cards, next one highlighted, Hijri date); the Clock screensaver
+   shows the same view under the clock. Settings: `prayer_*`, `hijri_offset_days`, `dream_prayer`.
+5. **Personal config.** An eight-app dock (Netflix, Prime Video, YouTube, JioHotstar, JioCinema, Spotify,
    SonyLIV, Zee5) in one row with `columns` 8, `com.android.tv` as the Live TV app, and no dark band
    behind the dock (`dock_band` false), so the dock sits on the wallpaper like the grid rows.
 

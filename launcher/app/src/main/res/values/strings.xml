@@ -23,6 +23,7 @@
     <string name="vpn">VPN</string>
     <string name="vpn_off">VPN off</string>
     <string name="wallpaper">Wallpaper</string>
+    <string name="prayer_times_title">Prayer Times</string>
     <string name="wallpaper_current">Now</string>
     <string name="wallpaper_hint">Pick a picture. Pictures change every %1$d minutes; a new one sent to %2$s shows at once.</string>
     <string name="wallpaper_hint_fixed">Pick a picture. A new one sent to %1$s shows at once.</string>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The next prayer's card: solid green, as in the CleanXiaomiTV Prayer Times screen. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FF1FA463" />
+    <corners android:radius="16dp" />
+</shape>

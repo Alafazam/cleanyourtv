@@ -47,6 +47,12 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `wallpaper_rotate_minutes` | 0 to 1440 | Minutes between changes while Home is open; `0` never rotates. A newly added picture always shows at once |
 | `dream_photos` | bool | The Clock screensaver shows the pictures from `wallpaper_folder` behind the clock (`true`), or the plain clock over the glow (`false`) |
 | `dream_photo_minutes` | 1 to 60 | Minutes each picture stays in the Clock screensaver |
+| `prayer_times` | bool | Prayer times calculated on the TV: current and next prayer on Home, a Prayer Times tile, and the day in the Clock screensaver |
+| `prayer_city`, `prayer_latitude`, `prayer_longitude`, `prayer_timezone` | string | The place, e.g. `"Bengaluru"`, `"12.9716"`, `"77.5946"`, `"Asia/Kolkata"` |
+| `prayer_fajr_angle`, `prayer_isha_angle` | 10 to 25 | Sun angle below the horizon for Fajr and Isha (18 and 18: Karachi method) |
+| `prayer_asr_factor` | 1 or 2 | Asr shadow length: 1 Shafi'i, 2 Hanafi |
+| `hijri_offset_days` | -3 to 3 | Days added to the Hijri date (Umm al-Qura) for local moon sighting |
+| `dream_prayer` | bool | The prayer view under the clock in the Clock screensaver |
 
 ## Wallpapers
 

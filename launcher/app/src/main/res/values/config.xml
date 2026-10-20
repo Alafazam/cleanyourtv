@@ -112,4 +112,21 @@
     <bool name="dream_photos">true</bool>
     <!-- Minutes each picture stays in the Clock screensaver (1 to 60); the clock moves every minute regardless. -->
     <integer name="dream_photo_minutes">2</integer>
+
+    <!-- Prayer times, calculated on the TV with no network (PrayerTimes): the current and next prayer on Home, a
+         Prayer Times tile with the full day, and the day in the Clock screensaver. false hides all three. -->
+    <bool name="prayer_times">true</bool>
+    <string name="prayer_city" translatable="false">Bengaluru</string>
+    <string name="prayer_latitude" translatable="false">12.9716</string>
+    <string name="prayer_longitude" translatable="false">77.5946</string>
+    <string name="prayer_timezone" translatable="false">Asia/Kolkata</string>
+    <!-- Sun angle below the horizon for Fajr and Isha: 18 and 18 is the Karachi method, common in India. -->
+    <integer name="prayer_fajr_angle">18</integer>
+    <integer name="prayer_isha_angle">18</integer>
+    <!-- Asr shadow length: 1 Shafi'i, Maliki, Hanbali; 2 Hanafi. -->
+    <integer name="prayer_asr_factor">2</integer>
+    <!-- Days added to the Hijri date (Umm al-Qura) to match local moon sighting, e.g. -1. -->
+    <integer name="hijri_offset_days">0</integer>
+    <!-- Show the prayer view in the Clock screensaver. -->
+    <bool name="dream_prayer">true</bool>
 </resources>
